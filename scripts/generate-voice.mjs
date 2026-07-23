@@ -23,7 +23,8 @@
  */
 import { createHash } from 'node:crypto'
 import { execFile } from 'node:child_process'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
@@ -39,8 +40,8 @@ const DRY_RUN = process.argv.includes('--dry-run')
 const PROJECT = process.env.GOOGLE_TTS_PROJECT || ''
 // 動的な数字の生成上限（歩数）。これを超える値は実行時に合成音声へフォールバック。
 const MAX_STEPS = Number(process.env.VOICE_MAX_STEPS || 400)
-// 同時リクエスト数（速度と API レート制限のバランス）
-const CONCURRENCY = Number(process.env.VOICE_CONCURRENCY || 5)
+// 同時リクエスト数（速度と API レート制限のバランス）。TTS は分あたりのクォータがあるので控えめ。
+const CONCURRENCY = Number(process.env.VOICE_CONCURRENCY || 3)
 
 // ---- 犬の音声設定（みまもり時計の buildPrompt / audioConfig を踏襲）----
 // voice/model は共通。犬らしさ・落ち着き具合は「話し方の指示（style）」と speakingRate で調整する。
@@ -71,68 +72,83 @@ const TTS_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize'
  * features.ts は拡張子なし import のため Node から直接読めないので、ここに写している。
  * （文言を変えたら両方直すこと。ズレても実行時は合成音声にフォールバックするだけ）
  */
+// phrases.ts 以外の固定文。name はファイル名（意味が分かる名前）。
 const EXTRA_LINES = [
-  'カメラの前に立ってみましょう',
-  '足もとが見えていません。もう少し下がってみましょう',
-  '上半身が見えていません。カメラの正面に立ってみましょう',
-  'カメラに近すぎます。もう少し下がってください',
-  '少しカメラに近づいてください',
-  '体が画面からはみ出しています。立ち位置を合わせましょう',
-  'もう一度立ち位置を合わせましょう',
-  'ばっちりです。はじめましょう',
+  { text: 'カメラの前に立ってみましょう', name: 'guide-noperson' },
+  { text: '足もとが見えていません。もう少し下がってみましょう', name: 'guide-lowerbody' },
+  { text: '上半身が見えていません。カメラの正面に立ってみましょう', name: 'guide-upperbody' },
+  { text: 'カメラに近すぎます。もう少し下がってください', name: 'guide-tooclose' },
+  { text: '少しカメラに近づいてください', name: 'guide-toofar' },
+  { text: '体が画面からはみ出しています。立ち位置を合わせましょう', name: 'guide-outofframe' },
+  { text: 'もう一度立ち位置を合わせましょう', name: 'guide-retry' },
+  { text: 'ばっちりです。はじめましょう', name: 'guide-ready' },
   // 完走まとめの固定比較文（PetController.finish と同じ文面）
-  '前回よりひざがよく上がっています',
-  '前回より少し足が低めでした',
+  { text: '前回よりひざがよく上がっています', name: 'finish-raise-up' },
+  { text: '前回より少し足が低めでした', name: 'finish-raise-down' },
+]
+
+// 応援/分析/安全/キャリブレーションの各バンクに、ファイル名の接頭辞を割り当てる
+const BANK_PREFIX = [
+  ['cheer', 'CHEER_PHRASES'],
+  ['analysis', 'ANALYSIS_PHRASES'],
+  ['safety', 'SAFETY_PHRASES'],
+  ['calib', 'CALIBRATION_PHRASES'],
 ]
 
 /**
  * 生成対象のセリフを集める。
- * 返り値は { text, preload } の配列。preload=true は常用の短文（起動時に先読みする）、
- * false は完走まとめの数字違いなど大量になるもの（必要時に遅延読み込み）。
+ * 返り値は { text, preload, name } の配列。
+ *   name … 意味が分かるファイル名（拡張子なし）。例: cheer-keepGoing-1 / milestone-25-1 / finish-total-130
+ *   preload=true は常用の短文（起動時に先読み）、false は完走まとめの数字違い（遅延読み込み）。
  */
 async function collectLines() {
   const phrases = await import('../src/pet/phrases.ts')
   const { fillTemplate } = phrases
   const items = []
   const seen = new Set()
-  const add = (text, preload) => {
+  const usedNames = new Set()
+  const add = (text, preload, name) => {
     const t = String(text).trim()
     if (!t || t.includes('{') || seen.has(t)) return
+    if (usedNames.has(name)) throw new Error(`ファイル名が重複: ${name}`)
     seen.add(t)
-    items.push({ text: t, preload })
+    usedNames.add(name)
+    items.push({ text: t, preload, name })
   }
 
-  // 1) 固定セリフ（応援・分析・安全・キャリブレーション）
-  for (const bank of [
-    phrases.CHEER_PHRASES,
-    phrases.ANALYSIS_PHRASES,
-    phrases.SAFETY_PHRASES,
-    phrases.CALIBRATION_PHRASES,
-  ]) {
-    for (const arr of Object.values(bank)) for (const line of arr) add(line, true)
+  // 1) 固定セリフ（応援・分析・安全・キャリブレーション）: <バンク>-<キー>-<番号>
+  for (const [prefix, bankName] of BANK_PREFIX) {
+    for (const [key, arr] of Object.entries(phrases[bankName])) {
+      arr.forEach((line, i) => add(line, true, `${prefix}-${key}-${i + 1}`))
+    }
   }
 
   // 2) phrases.ts 以外の固定文（案内など）
-  for (const line of EXTRA_LINES) add(line, true)
+  for (const { text, name } of EXTRA_LINES) add(text, true, name)
 
-  // 3) 歩数の節目（25 刻み）… テンプレートは phrases.ts から取る
+  // 3) 歩数の節目（25 刻み）: milestone-<歩数>-<番号>
   for (let s = 25; s <= MAX_STEPS; s += 25) {
-    for (const tpl of phrases.CHEER_PHRASES.milestoneSteps) add(fillTemplate(tpl, { steps: s }), true)
+    phrases.CHEER_PHRASES.milestoneSteps.forEach((tpl, i) =>
+      add(fillTemplate(tpl, { steps: s }), true, `milestone-${s}-${i + 1}`),
+    )
   }
 
-  // 4) 残り時間（60 / 30 / 10 秒）
+  // 4) 残り時間（60 / 30 / 10 秒）: remaining-<秒>s-<番号>
   for (const sec of [60, 30, 10]) {
-    for (const tpl of phrases.CHEER_PHRASES.remainingTime) add(fillTemplate(tpl, { seconds: sec }), true)
+    phrases.CHEER_PHRASES.remainingTime.forEach((tpl, i) =>
+      add(fillTemplate(tpl, { seconds: sec }), true, `remaining-${sec}s-${i + 1}`),
+    )
   }
 
-  // 5) 完走まとめの数字入り文（PetController.finish と同じ文面）。数が多いので遅延読み込み。
-  for (let n = 0; n <= MAX_STEPS; n++) add(`${n}歩、歩きました`, false)
-  for (let n = 1; n <= MAX_STEPS; n++) add(`前回より${n}歩多く歩けました`, false)
+  // 5) 完走まとめの数字入り文: finish-total-<歩数> / finish-diff-<差>
+  for (let n = 0; n <= MAX_STEPS; n++) add(`${n}歩、歩きました`, false, `finish-total-${n}`)
+  for (let n = 1; n <= MAX_STEPS; n++) add(`前回より${n}歩多く歩けました`, false, `finish-diff-${n}`)
 
   return items
 }
 
-const fileNameFor = (text) => createHash('sha1').update(text).digest('hex').slice(0, 12) + '.mp3'
+/** 旧命名（sha1 ハッシュ）。既存ファイルを新しい名前に移行するために残す。 */
+const legacyHashName = (text) => createHash('sha1').update(text).digest('hex').slice(0, 12) + '.mp3'
 
 let cachedToken = null
 async function accessToken() {
@@ -166,10 +182,11 @@ async function synthesize(text, attempt = 0) {
   })
   if (!res.ok) {
     const body = await res.text()
-    // レート制限・一時エラーは指数バックオフで最大 5 回まで
-    if ((res.status === 429 || res.status >= 500) && attempt < 5) {
-      cachedToken = null // トークン失効の可能性に備え取り直す
-      await sleep(800 * 2 ** attempt)
+    // レート制限(429=分あたりクォータ)・一時エラーはバックオフでリトライ。
+    // クォータは毎分リセットされるので、待ち時間の上限は 60 秒まで伸ばして待ち切る。
+    if ((res.status === 429 || res.status >= 500) && attempt < 8) {
+      if (res.status !== 429) cachedToken = null // トークン失効に備える（429 はトークンの問題ではない）
+      await sleep(Math.min(60000, 1500 * 2 ** attempt))
       return synthesize(text, attempt + 1)
     }
     throw new Error(`TTS ${res.status}: ${body.slice(0, 200)}`)
@@ -237,32 +254,67 @@ async function main() {
   }
 
   await mkdir(outDir, { recursive: true })
+
+  // 旧命名（sha1 ハッシュ）のファイルが残っていれば、新しい名前へリネームして移行する。
+  // これにより再課金せずファイル名だけ付け替えられる。
+  let migrated = 0
+  for (const item of items) {
+    const newDest = resolve(outDir, `${item.name}.mp3`)
+    const oldDest = resolve(outDir, legacyHashName(item.text))
+    if (!existsSync(newDest) && existsSync(oldDest)) {
+      await rename(oldDest, newDest)
+      migrated++
+    }
+  }
+  if (migrated > 0) console.log(`旧ハッシュ名から ${migrated} 件をリネーム移行しました。`)
+
   const manifest = {}
   const preload = []
   let ok = 0
   let done = 0
+  let skipped = 0
 
   await runPool(items, async (item) => {
-    const file = fileNameFor(item.text)
-    try {
-      const pcm = await synthesize(item.text)
-      await pcmToMp3File(pcm, resolve(outDir, file))
+    const file = `${item.name}.mp3`
+    const dest = resolve(outDir, file)
+    // 再開：既に生成済みのファイルは API を叩かず再利用する
+    if (existsSync(dest)) {
       manifest[item.text] = file
       if (item.preload) preload.push(file)
       ok++
-    } catch (err) {
-      console.error(`✗ ${item.text} — ${err.message}`)
+      skipped++
+    } else {
+      try {
+        const pcm = await synthesize(item.text)
+        await pcmToMp3File(pcm, dest)
+        manifest[item.text] = file
+        if (item.preload) preload.push(file)
+        ok++
+      } catch (err) {
+        console.error(`✗ ${item.text} — ${err.message}`)
+      }
     }
     done++
-    if (done % 25 === 0 || done === items.length) {
-      console.log(`  進捗 ${done}/${items.length}（成功 ${ok}）`)
+    if (done % 50 === 0 || done === items.length) {
+      console.log(`  進捗 ${done}/${items.length}（成功 ${ok} / 既存再利用 ${skipped}）`)
     }
   })
+
+  // マニフェストに載っていない mp3（旧ハッシュ名の残骸など）を掃除する
+  const valid = new Set(Object.values(manifest))
+  let removed = 0
+  for (const f of await readdir(outDir)) {
+    if (f.endsWith('.mp3') && !valid.has(f)) {
+      await rm(resolve(outDir, f))
+      removed++
+    }
+  }
+  if (removed > 0) console.log(`未使用の mp3 を ${removed} 件削除しました。`)
 
   await writeFile(resolve(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
   await writeFile(resolve(outDir, 'preload.json'), JSON.stringify(preload) + '\n')
   console.log(
-    `\n完了：${ok}/${items.length} 件を ${outDir.replace(root + '/', '')} に生成しました。` +
+    `\n完了：${ok}/${items.length} 件を ${outDir.replace(root + '/', '')} に用意しました。` +
       `（先読み対象 ${preload.length} 件）`,
   )
 }
