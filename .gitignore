@@ -4,3 +4,6 @@ dist
 *.local
 # MediaPipe ランタイム/モデルは npm run setup:mediapipe で再取得できるため追跡しない
 public/mediapipe
+
+# Firebase デプロイキャッシュ
+.firebase

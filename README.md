@@ -60,6 +60,47 @@ npm run dev
 
 ---
 
+## デプロイ（Firebase Hosting）
+
+みまもり時計と同じ Firebase プロジェクト内に、この製品用の **2つ目の Hosting サイト**を追加して配信します
+（アカウントもプロジェクトも共用、URL だけ別）。カメラに必須の HTTPS は自動で付きます。
+
+### 初回だけ（サイトの作成と紐付け）
+
+```bash
+npx firebase-tools login                                   # 対話ログイン
+npx firebase-tools use <みまもり時計のプロジェクトID>        # 例: mimamori-clock-xxxx
+npx firebase-tools hosting:sites:create kinetone-stepping  # 好きなサイトID（URL になる）
+npx firebase-tools target:apply hosting stepping kinetone-stepping
+```
+
+- サイトID は世界で一意です。`kinetone-stepping` が取られていれば別名にしてください。
+  URL は `https://<サイトID>.web.app` になります。
+- `target:apply` の実行で `.firebaserc` に `stepping` ターゲットが書き込まれます。
+
+### 毎回のデプロイ
+
+```bash
+npm run deploy
+```
+
+`firebase.json` の predeploy で **`setup:mediapipe` → `build` を自動実行**してから配信するため、
+モデル/WASM の取得忘れは起きません。
+
+### 帯域について（重要）
+
+初回ロードで **姿勢推定モデル＋WASM＋動画で約 20MB** ダウンロードします。
+無料の Spark プランは転送 360MB/日（≒ 新規ロード約 18 回/日）です。
+
+- **ブースの 1 台（キオスク）で運用** → 一度読めばキャッシュされるので無料枠で問題なし
+- **URL を配って各自のスマホで試す** → 新規端末が増えると 18 回/日で頭打ち。
+  広く配るなら Blaze（従量・実費わずか）への切り替えを推奨
+
+大きな静的アセット（`*.wasm` `*.task` `*.mp4` とハッシュ付き JS/CSS）には
+`Cache-Control: immutable` を付けているので、キオスクと再訪問は転送を消費しません。
+
+---
+
 ## 画面の流れ
 
 ```
