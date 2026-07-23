@@ -49,6 +49,11 @@ const CONCURRENCY = Number(process.env.VOICE_CONCURRENCY || 3)
 const VOICE_NAME = process.env.VOICE_NAME || 'Despina'
 const MODEL_NAME = 'gemini-2.5-flash-tts'
 const SPEAKING_RATE = Number(process.env.VOICE_RATE || 0.85)
+// 「イチ、ニ」など掛け声はテンポよく（速め）にする。セリフ別の速度上書き用。
+// 聞き比べで 1.15 を採用。
+const COUNTIN_RATE = Number(process.env.VOICE_COUNTIN_RATE || 1.15)
+// 掛け声は TTS の間の取り方がばらつくので、複数回作って一番短い（テンポの良い）ものを採用する。
+const BRISK_TRIES = Number(process.env.VOICE_BRISK_TRIES || 4)
 const SAMPLE_RATE = 24000
 
 // 話し方の指示。落ち着いたトーンを既定にする（元は "energetic but soft"）。
@@ -144,7 +149,30 @@ async function collectLines() {
   for (let n = 0; n <= MAX_STEPS; n++) add(`${n}歩、歩きました`, false, `finish-total-${n}`)
   for (let n = 1; n <= MAX_STEPS; n++) add(`前回より${n}歩多く歩けました`, false, `finish-diff-${n}`)
 
+  // セリフ別の速度上書き：「イチ、ニ」の掛け声はテンポよく速め、かつ最短採用でばらつきを抑える
+  for (const it of items) {
+    if (it.name.startsWith('cheer-countIn')) {
+      it.rate = COUNTIN_RATE
+      it.brisk = true
+    }
+  }
+
   return items
+}
+
+/**
+ * item の音声(PCM)を得る。brisk 指定なら複数回合成して一番短い（＝間が詰まってテンポの良い）ものを選ぶ。
+ * PCM は 24kHz/16bit/mono なので、バイト長がそのまま長さに比例する。
+ */
+async function synthesizeItem(item) {
+  const rate = item.rate ?? SPEAKING_RATE
+  if (!item.brisk) return synthesize(item.text, rate)
+  let best = null
+  for (let i = 0; i < BRISK_TRIES; i++) {
+    const pcm = await synthesize(item.text, rate)
+    if (!best || pcm.length < best.length) best = pcm
+  }
+  return best
 }
 
 /** 旧命名（sha1 ハッシュ）。既存ファイルを新しい名前に移行するために残す。 */
@@ -161,7 +189,7 @@ async function accessToken() {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 /** Gemini-TTS を叩いて base64 PCM(16bit LE, 24kHz, mono) を得る。429/5xx はリトライ。 */
-async function synthesize(text, attempt = 0) {
+async function synthesize(text, rate = SPEAKING_RATE, attempt = 0) {
   const token = await accessToken()
   const res = await fetch(TTS_URL, {
     method: 'POST',
@@ -176,7 +204,7 @@ async function synthesize(text, attempt = 0) {
       audioConfig: {
         audioEncoding: 'LINEAR16',
         sampleRateHertz: SAMPLE_RATE,
-        speakingRate: SPEAKING_RATE,
+        speakingRate: rate,
       },
     }),
   })
@@ -187,7 +215,7 @@ async function synthesize(text, attempt = 0) {
     if ((res.status === 429 || res.status >= 500) && attempt < 8) {
       if (res.status !== 429) cachedToken = null // トークン失効に備える（429 はトークンの問題ではない）
       await sleep(Math.min(60000, 1500 * 2 ** attempt))
-      return synthesize(text, attempt + 1)
+      return synthesize(text, rate, attempt + 1)
     }
     throw new Error(`TTS ${res.status}: ${body.slice(0, 200)}`)
   }
@@ -231,10 +259,42 @@ function limitArg() {
   return i >= 0 ? Number(process.argv[i + 1]) : 0
 }
 
+/** --only <substr> で名前が一致するセリフだけを「強制的に」作り直す（manifest は触らない） */
+function onlyArg() {
+  const i = process.argv.indexOf('--only')
+  return i >= 0 ? String(process.argv[i + 1]) : ''
+}
+
 async function main() {
   let items = await collectLines()
   const limit = limitArg()
   if (limit > 0) items = items.slice(0, limit)
+
+  // --only モード：一部だけ作り直す。既存を上書きし、manifest/掃除はしない（他のクリップを消さない）。
+  const only = onlyArg()
+  if (only) {
+    items = items.filter((it) => it.name.includes(only) || it.text.includes(only))
+    console.log(`--only "${only}": ${items.length} 件だけ作り直します（manifest は変更しません）`)
+    if (!PROJECT) {
+      console.error('環境変数 GOOGLE_TTS_PROJECT を指定してください。')
+      process.exit(1)
+    }
+    await mkdir(outDir, { recursive: true })
+    let n = 0
+    await runPool(items, async (item) => {
+      const dest = resolve(outDir, `${item.name}.mp3`)
+      try {
+        const pcm = await synthesizeItem(item)
+        await pcmToMp3File(pcm, dest)
+        n++
+        console.log(`✓ ${item.name}.mp3  (rate ${item.rate ?? SPEAKING_RATE})  ${item.text}`)
+      } catch (err) {
+        console.error(`✗ ${item.name} — ${err.message}`)
+      }
+    })
+    console.log(`\n完了：${n}/${items.length} 件を作り直しました。`)
+    return
+  }
   const preloadCount = items.filter((it) => it.preload).length
   console.log(
     `対象セリフ: ${items.length} 件（常用/先読み ${preloadCount} 件 ＋ 完走まとめ数字 ${
@@ -285,7 +345,7 @@ async function main() {
       skipped++
     } else {
       try {
-        const pcm = await synthesize(item.text)
+        const pcm = await synthesizeItem(item)
         await pcmToMp3File(pcm, dest)
         manifest[item.text] = file
         if (item.preload) preload.push(file)
