@@ -30,7 +30,10 @@ import { promisify } from 'node:util'
 
 const execFileP = promisify(execFile)
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const outDir = resolve(root, 'assets/voice/dog')
+// 出力先は環境変数で差し替え可能（聞き比べ用に別フォルダへ出す）
+const outDir = process.env.VOICE_OUT_DIR
+  ? resolve(process.env.VOICE_OUT_DIR)
+  : resolve(root, 'assets/voice/dog')
 
 const DRY_RUN = process.argv.includes('--dry-run')
 const PROJECT = process.env.GOOGLE_TTS_PROJECT || ''
@@ -40,17 +43,24 @@ const MAX_STEPS = Number(process.env.VOICE_MAX_STEPS || 400)
 const CONCURRENCY = Number(process.env.VOICE_CONCURRENCY || 5)
 
 // ---- 犬の音声設定（みまもり時計の buildPrompt / audioConfig を踏襲）----
-const VOICE_NAME = 'Leda'
+// voice/model は共通。犬らしさ・落ち着き具合は「話し方の指示（style）」と speakingRate で調整する。
+// 採用ボイス（サンプル聞き比べで Despina / rate 0.85 / 落ち着きstyle に決定）
+const VOICE_NAME = process.env.VOICE_NAME || 'Despina'
 const MODEL_NAME = 'gemini-2.5-flash-tts'
-const SPEAKING_RATE = 0.85
+const SPEAKING_RATE = Number(process.env.VOICE_RATE || 0.85)
 const SAMPLE_RATE = 24000
+
+// 話し方の指示。落ち着いたトーンを既定にする（元は "energetic but soft"）。
+const DOG_STYLE =
+  process.env.VOICE_STYLE ||
+  'a calm, gentle dog mascot; warm and reassuring; soft and unhurried; quietly encouraging, not excited.'
 
 const DOG_PROMPT =
   'Read the given text in Japanese exactly as written, verbatim. ' +
   'Do NOT add, remove, reorder, paraphrase, or insert any words or sounds. ' +
   'Do NOT add greetings, interjections, fillers, or self-introductions. ' +
   'Do NOT change the content. Only control speaking style. ' +
-  'Speaking style: friendly dog mascot, energetic but soft, encouraging, warm.'
+  `Speaking style: ${DOG_STYLE}`
 
 const TTS_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize'
 
