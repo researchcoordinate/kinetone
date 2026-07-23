@@ -1,6 +1,5 @@
 {
   "hosting": {
-    "target": "stepping",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "predeploy": ["npm run setup:mediapipe", "npm run build"],

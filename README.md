@@ -62,21 +62,22 @@ npm run dev
 
 ## デプロイ（Firebase Hosting）
 
-みまもり時計と同じ Firebase プロジェクト内に、この製品用の **2つ目の Hosting サイト**を追加して配信します
-（アカウントもプロジェクトも共用、URL だけ別）。カメラに必須の HTTPS は自動で付きます。
+kinetone 専用の Firebase プロジェクトを作って配信します（みまもり時計とは別プロジェクト・同じアカウントで可）。
+カメラに必須の HTTPS は自動で付きます。
 
-### 初回だけ（サイトの作成と紐付け）
+### 初回だけ（プロジェクト作成と紐付け）
 
 ```bash
-npx firebase-tools login                                   # 対話ログイン
-npx firebase-tools use <みまもり時計のプロジェクトID>        # 例: mimamori-clock-xxxx
-npx firebase-tools hosting:sites:create kinetone-stepping  # 好きなサイトID（URL になる）
-npx firebase-tools target:apply hosting stepping kinetone-stepping
+npx firebase-tools login                                                   # 対話ログイン
+npx firebase-tools projects:create kinetone-stepping --display-name "kinetone stepping"
+npx firebase-tools use kinetone-stepping
 ```
 
-- サイトID は世界で一意です。`kinetone-stepping` が取られていれば別名にしてください。
-  URL は `https://<サイトID>.web.app` になります。
-- `target:apply` の実行で `.firebaserc` に `stepping` ターゲットが書き込まれます。
+- プロジェクトID `kinetone-stepping` は世界で一意です。取られていれば別名にしてください。
+  既定の URL は `https://<プロジェクトID>.web.app` になります。
+- `firebase use` の実行で `.firebaserc` に既定プロジェクトが書き込まれます。
+- 初回デプロイで「Hosting サイトが無い」と言われたら
+  `npx firebase-tools hosting:sites:create <プロジェクトID>` を実行してから再度デプロイしてください。
 
 ### 毎回のデプロイ
 
