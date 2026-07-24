@@ -7,3 +7,6 @@ public/mediapipe
 
 # Firebase デプロイキャッシュ
 .firebase
+
+# 測定サイト用の配信ディレクトリ（build で生成）
+dist-measure

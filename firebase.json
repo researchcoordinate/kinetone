@@ -21,12 +21,12 @@
     },
     {
       "target": "measure",
-      "public": "dist",
+      "public": "dist-measure",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [{ "source": "**", "destination": "/measure.html" }],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }],
       "headers": [
         {
-          "source": "/measure.html",
+          "source": "/index.html",
           "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
         },
         {
