@@ -1,5 +1,13 @@
 {
   "projects": {
     "default": "kinetone-stepping"
+  },
+  "targets": {
+    "kinetone-stepping": {
+      "hosting": {
+        "walk": ["kinetone-stepping"],
+        "measure": ["kinetone-steptest"]
+      }
+    }
   }
 }
