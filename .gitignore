@@ -1,12 +1,7 @@
-node_modules
-dist
 .DS_Store
-*.local
-# MediaPipe ランタイム/モデルは npm run setup:mediapipe で再取得できるため追跡しない
-public/mediapipe
+node_modules
 
-# Firebase デプロイキャッシュ
-.firebase
-
-# 測定サイト用の配信ディレクトリ（build で生成）
-dist-measure
+# multi-flower はまだ独立したリポジトリのまま。
+# 準備ができたら `git subtree add --prefix=multi-flower <path> main` で履歴ごと取り込み、
+# この行を消す。
+/multi-flower/
