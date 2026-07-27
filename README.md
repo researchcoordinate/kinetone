@@ -14,9 +14,10 @@
 | `aiube-exercise/` | あいうべ体操デモ・フェイスメッシュ版（静的サイト） | MediaPipe Face Landmarker | https://aiube-mesh-demo.web.app |
 | `aiube-exercise-avatar/` | あいうべ体操デモ・アバター版（静的サイト） | MediaPipe Face Landmarker | https://aiube-taisou-demo.web.app |
 | `hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる静的サイト） | TensorFlow.js MoveNet MultiPose | https://kinetone-hanabi.web.app |
+| `chair-stand-test/` | 5回椅子立ち上がりテスト（FTSST）の測定アプリ | MediaPipe Tasks Vision | https://kinetone-chairstand.web.app |
 | `multi-flower/` | アトラクト画面（多人数骨格 × 花の演出）※ 準備でき次第このリポジトリに取り込み | TensorFlow.js MoveNet | 未デプロイ |
 
-各アプリは独立しています（`stepping/` と `multi-flower/` は Vite プロジェクト、
+各アプリは独立しています（`stepping/` `chair-stand-test/` `multi-flower/` は Vite プロジェクト、
 `aiube-exercise*/` と `hanabi/` はビルド不要の静的サイト）。依存関係もビルドも配信先も別々なので、
 **作業はそのフォルダの中で行います**（リポジトリのルートに `package.json` は置いていません）。
 
@@ -29,6 +30,7 @@
 | `aiube-taisou-demo` | `aiube-mesh-demo` | （既定） | `aiube-exercise/public/` | https://aiube-mesh-demo.web.app |
 | `aiube-taisou-demo` | `aiube-taisou-demo` | （既定） | `aiube-exercise-avatar/public/` | https://aiube-taisou-demo.web.app |
 | `kinetone-hanabi` | `kinetone-hanabi` | （既定） | `hanabi/`（開発用ファイルは除外） | https://kinetone-hanabi.web.app |
+| `kinetone-chairstand` | `kinetone-chairstand` | （既定） | `chair-stand-test/dist/` | https://kinetone-chairstand.web.app |
 
 stepping の 2 サイトは同じ Firebase プロジェクト **`kinetone-stepping`**（プロジェクト番号 708164199952）内の
 2 サイトです。`measure.html` を `index.html` として置いた `dist-measure/` を測定サイトに配信することで、
