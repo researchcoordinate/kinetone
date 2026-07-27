@@ -7,13 +7,28 @@
 
 ## 収録アプリ
 
-| フォルダ | 内容 | 姿勢推定 | Firebase プロジェクト（配信先） |
+| フォルダ | 内容 | 姿勢推定 | 公開 URL |
 |---|---|---|---|
-| `stepping/` | おさんぽ足踏み（その場足踏みリハビリゲーム）と、2分間足踏みテストの測定アプリ | MediaPipe Tasks Vision | `kinetone-stepping`（おさんぽ）<br>`kinetone-steptest`（測定） |
-| `multi-flower/` | アトラクト画面（多人数骨格 × 花の演出）※ 準備でき次第このリポジトリに取り込み | TensorFlow.js MoveNet | `kinetone-multi-flower` |
+| `stepping/` | おさんぽ足踏み（その場足踏みリハビリゲーム） | MediaPipe Tasks Vision | https://kinetone-stepping.web.app |
+| `stepping/` | 2分間足踏みテストの測定アプリ（同じソースの `measure.html`） | MediaPipe Tasks Vision | https://kinetone-steptest.web.app |
+| `multi-flower/` | アトラクト画面（多人数骨格 × 花の演出）※ 準備でき次第このリポジトリに取り込み | TensorFlow.js MoveNet | 未デプロイ |
 
 各アプリは独立した Vite プロジェクトです。依存関係もビルドも配信先も別々なので、
 **作業はそのフォルダの中で行います**（リポジトリのルートに `package.json` は置いていません）。
+
+### 配信先の構成（Firebase Hosting）
+
+| Hosting サイト | deploy ターゲット | 配信元 | URL |
+|---|---|---|---|
+| `kinetone-stepping` | `walk` | `stepping/dist/` | https://kinetone-stepping.web.app |
+| `kinetone-steptest` | `measure` | `stepping/dist-measure/` | https://kinetone-steptest.web.app |
+
+どちらも Firebase プロジェクト **`kinetone-stepping`**（プロジェクト番号 708164199952）内の
+2 サイトです。`measure.html` を `index.html` として置いた `dist-measure/` を測定サイトに配信することで、
+同じソースから 2 つの URL を出しています（`stepping/scripts/split-measure-dist.mjs`）。
+
+multi-flower は `.firebaserc` に `kinetone-multi-flower` と書かれていますが、
+**その Firebase プロジェクトはまだ作成されていません**（初回デプロイ時に作成が必要）。
 
 ```bash
 cd stepping
@@ -25,8 +40,9 @@ npm run dev
 デプロイも同じくフォルダの中から実行します。
 
 ```bash
-cd stepping && npm run deploy                          # おさんぽ・測定の両サイト
-npx firebase-tools deploy --only hosting:walk          # おさんぽだけ配信したいとき
+cd stepping && npm run deploy                    # 両サイト（walk + measure）
+npx firebase-tools deploy --only hosting:walk    # おさんぽ（kinetone-stepping）だけ
+npx firebase-tools deploy --only hosting:measure # 測定（kinetone-steptest）だけ
 ```
 
 詳しい仕様・設計は各フォルダの README を参照してください。
