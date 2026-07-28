@@ -10,7 +10,7 @@
     --bg-1:#0d1726;
     --bg-2:#152238;
     --card:#1b2a44;
-    --card-hover:#223554;
+    --card-hover:#25395b;
     --text:#f2f5fb;
     --text-dim:#a8b6cd;
     --accent:#7bf2cd;
@@ -23,92 +23,112 @@
     color:var(--text);
     background:linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);
     -webkit-text-size-adjust:100%;
-    padding:clamp(20px,4vw,48px);
+    -webkit-tap-highlight-color:transparent;
+    padding:clamp(14px,2.6vw,32px) clamp(14px,3vw,40px) clamp(28px,5vh,56px);
   }
-  header{max-width:1100px;margin:0 auto clamp(20px,4vh,44px);}
-  .brand{margin:0;font-size:clamp(15px,2vw,19px);letter-spacing:.28em;color:var(--accent);text-transform:uppercase;}
-  h1{margin:.2em 0 .1em;font-size:clamp(26px,4.4vw,44px);letter-spacing:.02em;}
-  .lead{margin:0;color:var(--text-dim);font-size:clamp(14px,1.9vw,20px);line-height:1.8;}
+  .wrap{max-width:1240px;margin:0 auto;}
 
-  main{max-width:1100px;margin:0 auto;}
-  h2{font-size:clamp(15px,2vw,20px);color:var(--text-dim);font-weight:700;letter-spacing:.14em;
-     margin:clamp(22px,4vh,40px) 0 .8em;}
+  /* 見出しは小さく。1画面のうちタイルに使える面積を最優先する */
+  header{display:flex;align-items:baseline;gap:.9em;flex-wrap:wrap;margin-bottom:clamp(12px,2vh,20px);}
+  .brand{margin:0;font-size:clamp(14px,1.7vw,18px);letter-spacing:.3em;color:var(--accent);text-transform:uppercase;}
+  .tagline{margin:0;color:var(--text-dim);font-size:clamp(12px,1.5vw,15px);}
 
-  .tiles{display:grid;gap:clamp(12px,1.8vw,20px);
-         grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));list-style:none;padding:0;margin:0;}
-  .tile{display:flex;flex-direction:column;gap:.5em;justify-content:center;
-        min-height:clamp(128px,17vh,168px);padding:clamp(18px,2.4vw,26px);
-        background:var(--card);border-radius:20px;text-decoration:none;color:inherit;
-        box-shadow:0 8px 26px #0006, inset 0 0 0 1px #ffffff12;
+  h2{display:flex;align-items:center;gap:.6em;
+     font-size:clamp(16px,2.1vw,22px);font-weight:800;letter-spacing:.1em;color:var(--text);
+     margin:clamp(14px,2.4vh,24px) 0 clamp(8px,1.4vh,14px);}
+  h2::after{content:"";flex:1;height:1px;background:#ffffff1f;}
+
+  .tiles{display:grid;gap:clamp(10px,1.4vw,18px);
+         grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));
+         list-style:none;padding:0;margin:0;}
+  .tile{display:block;text-decoration:none;color:inherit;
+        background:var(--card);border-radius:18px;overflow:hidden;
+        box-shadow:0 8px 24px #0006, inset 0 0 0 1px #ffffff14;
         transition:background .15s ease, transform .08s ease;}
   .tile:hover{background:var(--card-hover);}
   .tile:active{transform:translateY(2px);}
   .tile:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
-  .tile .icon{font-size:clamp(30px,4.2vw,42px);line-height:1;}
-  .tile .name{font-size:clamp(19px,2.5vw,26px);font-weight:800;}
-  .tile .desc{font-size:clamp(13px,1.6vw,16px);color:var(--text-dim);line-height:1.6;}
-  .tile--measure{box-shadow:0 8px 26px #0006, inset 0 0 0 1px #7bf2cd44;}
-  .tile--soon{opacity:.55;cursor:default;}
-  .tile--soon .badge{align-self:flex-start;font-size:clamp(11px,1.3vw,13px);font-weight:700;
-                     background:#ffffff1a;color:var(--text-dim);padding:.25em .8em;border-radius:999px;}
+  /* サムネイルは 16:9 で書き出してあるので、幅だけ合わせれば切れずに収まる */
+  .tile img{display:block;width:100%;height:auto;background:#0a1220;}
+  .tile .body{padding:clamp(10px,1.4vw,16px) clamp(12px,1.6vw,18px) clamp(12px,1.8vw,18px);}
+  .tile .name{display:block;font-size:clamp(17px,2.1vw,22px);font-weight:800;line-height:1.35;}
+  .tile .desc{display:block;margin-top:.35em;font-size:clamp(12px,1.4vw,15px);color:var(--text-dim);line-height:1.6;}
 
-  footer{max-width:1100px;margin:clamp(28px,5vh,52px) auto 0;color:var(--text-dim);
-         font-size:clamp(12px,1.5vw,15px);line-height:1.9;}
+  /* 「はかる」は測定であることが一目で分かるよう縁の色を変える */
+  .tile--measure{box-shadow:0 8px 24px #0006, inset 0 0 0 2px #7bf2cd55;}
+
+  /* 職員向けは利用者が押す導線と混ざらないよう、最後に小さく置く */
+  .staff{margin-top:clamp(22px,4vh,40px);display:flex;justify-content:flex-end;}
+  .staff-btn{display:inline-flex;align-items:center;gap:.6em;
+             font-family:inherit;font-size:clamp(13px,1.5vw,16px);font-weight:700;
+             color:var(--text-dim);background:#ffffff0f;border:1px solid #ffffff1f;
+             padding:.7em 1.4em;border-radius:999px;text-decoration:none;cursor:default;}
+  .staff-btn .badge{font-size:.85em;font-weight:700;color:#0d1726;background:var(--text-dim);
+                    padding:.1em .7em;border-radius:999px;}
+
+  footer{margin-top:clamp(14px,2vh,20px);color:var(--text-dim);
+         font-size:clamp(11px,1.3vw,14px);line-height:1.8;text-align:right;}
 </style>
 </head>
 <body>
+<div class="wrap">
   <header>
     <p class="brand">kinetone</p>
-    <h1>きょうは何をしますか</h1>
-    <p class="lead">カメラに映るだけで遊べます。カメラの映像はこの端末の中だけで使い、外には送りません。</p>
+    <p class="tagline">カメラに映るだけで遊べます。映像はこの端末の中だけで使い、外には送りません。</p>
   </header>
 
   <main>
     <h2>あそぶ</h2>
     <ul class="tiles">
       <li><a class="tile" href="/stepping/">
-        <span class="icon" aria-hidden="true">🚶</span>
-        <span class="name">おさんぽ足踏み</span>
-        <span class="desc">その場で足踏みすると、石畳の街が進みます</span>
+        <img src="thumbs/stepping.jpg" alt="" width="480" height="270">
+        <span class="body">
+          <span class="name">おさんぽ足踏み</span>
+          <span class="desc">その場で足踏みすると、石畳の街が進みます</span>
+        </span>
       </a></li>
       <li><a class="tile" href="/hanabi/">
-        <span class="icon" aria-hidden="true">🎆</span>
-        <span class="name">みんなで花火</span>
-        <span class="desc">みんなで手を振ると、夜空に花火が上がります</span>
+        <img src="thumbs/hanabi.jpg" alt="" width="480" height="270">
+        <span class="body">
+          <span class="name">みんなで花火</span>
+          <span class="desc">みんなで手を振ると、夜空に花火が上がります</span>
+        </span>
       </a></li>
       <li><a class="tile" href="/aiube/">
-        <span class="icon" aria-hidden="true">😀</span>
-        <span class="name">あいうべ体操</span>
-        <span class="desc">「あ・い・う・べ」と口を大きく動かします</span>
+        <img src="thumbs/aiube.jpg" alt="" width="480" height="270">
+        <span class="body">
+          <span class="name">あいうべ体操</span>
+          <span class="desc">「あ・い・う・べ」と口を大きく動かします</span>
+        </span>
       </a></li>
     </ul>
 
     <h2>はかる</h2>
     <ul class="tiles">
       <li><a class="tile tile--measure" href="/steptest/">
-        <span class="icon" aria-hidden="true">⏱️</span>
-        <span class="name">2分間足踏みテスト</span>
-        <span class="desc">その場足踏みの回数を数えます</span>
+        <img src="thumbs/steptest.jpg" alt="" width="480" height="270">
+        <span class="body">
+          <span class="name">2分間足踏みテスト</span>
+          <span class="desc">その場足踏みの回数を数え、年代・性別の基準と比べます</span>
+        </span>
       </a></li>
       <li><a class="tile tile--measure" href="/chair-stand/">
-        <span class="icon" aria-hidden="true">🪑</span>
-        <span class="name">5回椅子立ち上がり</span>
-        <span class="desc">立ち座り5回にかかる時間を計ります</span>
+        <img src="thumbs/chair-stand.jpg" alt="" width="480" height="270">
+        <span class="body">
+          <span class="name">5回椅子立ち上がり</span>
+          <span class="desc">立ち座り5回にかかる時間を計ります</span>
+        </span>
       </a></li>
-    </ul>
-
-    <h2>きろく</h2>
-    <ul class="tiles">
-      <li><div class="tile tile--soon">
-        <span class="badge">準備中</span>
-        <span class="name">利用者の登録・記録</span>
-        <span class="desc">利用者を登録すると、毎日の運動や測定の記録を残せるようになります</span>
-      </div></li>
     </ul>
   </main>
 
+  <div class="staff">
+    <span class="staff-btn">職員メニュー<span class="badge">準備中</span></span>
+  </div>
+
   <footer>
-    <p>各アプリの記録はこの端末のブラウザにのみ保存されます。カメラの映像は保存も送信もしません。</p>
+    <p>記録はこの端末のブラウザにのみ保存されます。カメラの映像は保存も送信もしません。</p>
   </footer>
+</div>
 </body>
 </html>
