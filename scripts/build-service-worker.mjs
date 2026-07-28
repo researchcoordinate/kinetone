@@ -25,9 +25,18 @@ async function walk(dir) {
   return out
 }
 
+// MediaPipe（段階2の比較用・既定エンジンではない）は容量が大きい（wasm+モデルで数十MB）。
+// 既定の movenet では読み込まないので、オフライン先読みからは外す。
+// engine=mediapipe を本番採用するなら、この除外を解いて容量とインストール時間を再評価すること。
+const EXCLUDE_FROM_PRECACHE = (f) =>
+  f.startsWith('/mediapipe/') ||
+  f.startsWith('/models/pose-landmarker/') ||
+  f.startsWith('/models/object-detector/')
+
 const files = (await walk(dist))
   .map((f) => '/' + relative(dist, f).split('\\').join('/'))
   .filter((f) => f !== '/sw.js')
+  .filter((f) => !EXCLUDE_FROM_PRECACHE(f))
   .sort()
 
 // 版が変わったことを検出できるよう、ファイル名とサイズからハッシュを作る

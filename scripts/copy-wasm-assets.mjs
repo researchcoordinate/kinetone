@@ -14,17 +14,31 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const srcDir = resolve(root, 'node_modules/@tensorflow/tfjs-backend-wasm/dist')
-const outDir = resolve(root, 'public/tfjs-wasm')
 
-// .wasm 本体と、スレッド版が読み込むワーカー JS
-const wanted = (f) => f.endsWith('.wasm') || f.endsWith('.worker.js')
-
-await mkdir(outDir, { recursive: true })
-const files = (await readdir(srcDir)).filter(wanted)
-if (files.length === 0) throw new Error(`コピー元が見つかりません: ${srcDir}`)
-for (const f of files) {
-  await copyFile(resolve(srcDir, f), resolve(outDir, f))
-  console.log(`  ${f}`)
+async function copyDir(srcDir, outDir, wanted, label) {
+  await mkdir(outDir, { recursive: true })
+  const files = (await readdir(srcDir)).filter(wanted)
+  if (files.length === 0) throw new Error(`コピー元が見つかりません: ${srcDir}`)
+  for (const f of files) {
+    await copyFile(resolve(srcDir, f), resolve(outDir, f))
+    console.log(`  ${f}`)
+  }
+  console.log(`${files.length} 件を ${label} にコピーしました。`)
 }
-console.log(`${files.length} 件を public/tfjs-wasm/ にコピーしました。`)
+
+// TF.js WASM バックエンド（.wasm 本体と、スレッド版が読み込むワーカー JS）
+await copyDir(
+  resolve(root, 'node_modules/@tensorflow/tfjs-backend-wasm/dist'),
+  resolve(root, 'public/tfjs-wasm'),
+  (f) => f.endsWith('.wasm') || f.endsWith('.worker.js'),
+  'public/tfjs-wasm/',
+)
+
+// MediaPipe Tasks Vision のランタイム（wasm ローダ JS と wasm 本体）
+// モデル（.task）は容量が大きいので別途 curl で取得し public/models/pose-landmarker/ に置く。
+await copyDir(
+  resolve(root, 'node_modules/@mediapipe/tasks-vision/wasm'),
+  resolve(root, 'public/mediapipe/wasm'),
+  (f) => f.endsWith('.wasm') || f.endsWith('.js'),
+  'public/mediapipe/wasm/',
+)
