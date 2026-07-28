@@ -6,6 +6,7 @@
  * そこで、それぞれをサブパス向けにビルドして site/ の下に並べる。
  *
  *   site/                 ホーム（アプリ選択）
+ *   site/flower/          みんなの花畑
  *   site/stepping/        おさんぽ足踏み（measure.html が 2 分間足踏みテスト）
  *   site/chair-stand/     5 回椅子立ち上がりテスト
  *   site/hanabi/          みんなで花火
@@ -25,8 +26,15 @@ const site = resolve(root, 'site')
 
 /** Vite プロジェクト（ビルドしてから dist を置く） */
 const VITE_APPS = [
-  { dir: 'stepping', path: '/stepping/' },
-  { dir: 'chair-stand-test', out: 'chair-stand', path: '/chair-stand/' },
+  { dir: 'multi-flower', out: 'flower', path: '/flower/', post: ['scripts/build-service-worker.mjs'] },
+  { dir: 'stepping', path: '/stepping/', setup: 'setup:mediapipe', needs: 'public/mediapipe' },
+  {
+    dir: 'chair-stand-test',
+    out: 'chair-stand',
+    path: '/chair-stand/',
+    setup: 'setup:mediapipe',
+    needs: 'public/mediapipe',
+  },
 ]
 
 /** ビルド不要の静的サイト（そのままコピー） */
@@ -57,12 +65,16 @@ await mkdir(site, { recursive: true })
 for (const app of VITE_APPS) {
   const cwd = resolve(root, app.dir)
   console.log(`\n▶ ${app.dir} を ${app.path} 向けにビルド`)
-  // MediaPipe のモデル・WASM は追跡していないので、無ければ取得する
-  if (!(await exists(resolve(cwd, 'public/mediapipe')))) {
-    run('npm', ['run', 'setup:mediapipe'], cwd)
+  // 追跡していないモデル・WASM は、無ければ取得スクリプトで用意する
+  if (app.setup && !(await exists(resolve(cwd, app.needs)))) {
+    run('npm', ['run', app.setup], cwd)
   }
   run('npx', ['tsc', '-b'], cwd)
   run('npx', ['vite', 'build'], cwd, { KINETONE_BASE: app.path })
+  // ビルド後の生成物（Service Worker など）はアプリ側のスクリプトに任せる
+  for (const script of app.post ?? []) {
+    run('node', [script], cwd, { KINETONE_BASE: app.path })
+  }
   await cp(resolve(cwd, 'dist'), resolve(site, app.out ?? app.dir), { recursive: true })
 }
 

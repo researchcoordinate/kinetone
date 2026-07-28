@@ -7,6 +7,7 @@
     "rewrites": [
       { "source": "/steptest", "destination": "/stepping/measure.html" },
       { "source": "/steptest/**", "destination": "/stepping/measure.html" },
+      { "source": "/flower/**", "destination": "/flower/index.html" },
       { "source": "/stepping/**", "destination": "/stepping/index.html" },
       { "source": "/chair-stand/**", "destination": "/chair-stand/index.html" },
       { "source": "/hanabi/**", "destination": "/hanabi/hanabi_game.html" },

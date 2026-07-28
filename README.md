@@ -15,6 +15,7 @@
 | パス | アプリ | 配信元 |
 |---|---|---|
 | `/` | ホーム（アプリ選択） | `home/` |
+| `/flower/` | みんなの花畑 | `multi-flower/`（`KINETONE_BASE=/flower/`） |
 | `/stepping/` | おさんぽ足踏み | `stepping/`（`KINETONE_BASE=/stepping/` でビルド） |
 | `/steptest/` | 2分間足踏みテスト | 同上（`measure.html` に rewrite） |
 | `/chair-stand/` | 5回椅子立ち上がり | `chair-stand-test/`（`KINETONE_BASE=/chair-stand/`） |
