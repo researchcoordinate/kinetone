@@ -5,7 +5,31 @@
 
 共通のホーム画面から各ゲームへ遷移する構成を予定しており、この 1 リポジトリで管理します。
 
-## 収録アプリ
+## 配信構成（統合サイト）
+
+利用者の名簿と記録をアプリ間で共有するため、**すべてを 1 つの origin にまとめて**配信します
+（ブラウザの localStorage はサイトごとに分かれるため、別 URL では名簿を共有できません）。
+
+**https://kinetone.web.app/** — Firebase プロジェクト `kinetone`
+
+| パス | アプリ | 配信元 |
+|---|---|---|
+| `/` | ホーム（アプリ選択） | `home/` |
+| `/stepping/` | おさんぽ足踏み | `stepping/`（`KINETONE_BASE=/stepping/` でビルド） |
+| `/steptest/` | 2分間足踏みテスト | 同上（`measure.html` に rewrite） |
+| `/chair-stand/` | 5回椅子立ち上がり | `chair-stand-test/`（`KINETONE_BASE=/chair-stand/`） |
+| `/hanabi/` | みんなで花火 | `hanabi/` |
+| `/aiube/` `/aiube-avatar/` | あいうべ体操 | `aiube-exercise*/public/` |
+
+```bash
+node scripts/build-site.mjs                # site/ を作る（各アプリをサブパス向けにビルド）
+npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeploy で上のビルドが走る）
+```
+
+各アプリは**単体サイトとしても**ビルドできます（`KINETONE_BASE` 未指定なら base は `/`）。
+下表の単体 URL は従来どおり生きていますが、名簿を共有できるのは統合サイトの方だけです。
+
+## 収録アプリ（単体配信）
 
 | フォルダ | 内容 | 姿勢推定 | 公開 URL |
 |---|---|---|---|

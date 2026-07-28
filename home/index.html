@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>kinetone</title>
+<meta name="description" content="カメラ 1 台で遊べる運動アプリ集">
+<style>
+  :root{
+    --bg-1:#0d1726;
+    --bg-2:#152238;
+    --card:#1b2a44;
+    --card-hover:#223554;
+    --text:#f2f5fb;
+    --text-dim:#a8b6cd;
+    --accent:#7bf2cd;
+    --warm:#f2a13a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,"Meiryo",sans-serif;
+    color:var(--text);
+    background:linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);
+    -webkit-text-size-adjust:100%;
+    padding:clamp(20px,4vw,48px);
+  }
+  header{max-width:1100px;margin:0 auto clamp(20px,4vh,44px);}
+  .brand{margin:0;font-size:clamp(15px,2vw,19px);letter-spacing:.28em;color:var(--accent);text-transform:uppercase;}
+  h1{margin:.2em 0 .1em;font-size:clamp(26px,4.4vw,44px);letter-spacing:.02em;}
+  .lead{margin:0;color:var(--text-dim);font-size:clamp(14px,1.9vw,20px);line-height:1.8;}
+
+  main{max-width:1100px;margin:0 auto;}
+  h2{font-size:clamp(15px,2vw,20px);color:var(--text-dim);font-weight:700;letter-spacing:.14em;
+     margin:clamp(22px,4vh,40px) 0 .8em;}
+
+  .tiles{display:grid;gap:clamp(12px,1.8vw,20px);
+         grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));list-style:none;padding:0;margin:0;}
+  .tile{display:flex;flex-direction:column;gap:.5em;justify-content:center;
+        min-height:clamp(128px,17vh,168px);padding:clamp(18px,2.4vw,26px);
+        background:var(--card);border-radius:20px;text-decoration:none;color:inherit;
+        box-shadow:0 8px 26px #0006, inset 0 0 0 1px #ffffff12;
+        transition:background .15s ease, transform .08s ease;}
+  .tile:hover{background:var(--card-hover);}
+  .tile:active{transform:translateY(2px);}
+  .tile:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
+  .tile .icon{font-size:clamp(30px,4.2vw,42px);line-height:1;}
+  .tile .name{font-size:clamp(19px,2.5vw,26px);font-weight:800;}
+  .tile .desc{font-size:clamp(13px,1.6vw,16px);color:var(--text-dim);line-height:1.6;}
+  .tile--measure{box-shadow:0 8px 26px #0006, inset 0 0 0 1px #7bf2cd44;}
+  .tile--soon{opacity:.55;cursor:default;}
+  .tile--soon .badge{align-self:flex-start;font-size:clamp(11px,1.3vw,13px);font-weight:700;
+                     background:#ffffff1a;color:var(--text-dim);padding:.25em .8em;border-radius:999px;}
+
+  footer{max-width:1100px;margin:clamp(28px,5vh,52px) auto 0;color:var(--text-dim);
+         font-size:clamp(12px,1.5vw,15px);line-height:1.9;}
+</style>
+</head>
+<body>
+  <header>
+    <p class="brand">kinetone</p>
+    <h1>きょうは何をしますか</h1>
+    <p class="lead">カメラに映るだけで遊べます。カメラの映像はこの端末の中だけで使い、外には送りません。</p>
+  </header>
+
+  <main>
+    <h2>あそぶ</h2>
+    <ul class="tiles">
+      <li><a class="tile" href="/stepping/">
+        <span class="icon" aria-hidden="true">🚶</span>
+        <span class="name">おさんぽ足踏み</span>
+        <span class="desc">その場で足踏みすると、石畳の街が進みます</span>
+      </a></li>
+      <li><a class="tile" href="/hanabi/">
+        <span class="icon" aria-hidden="true">🎆</span>
+        <span class="name">みんなで花火</span>
+        <span class="desc">みんなで手を振ると、夜空に花火が上がります</span>
+      </a></li>
+      <li><a class="tile" href="/aiube/">
+        <span class="icon" aria-hidden="true">😀</span>
+        <span class="name">あいうべ体操</span>
+        <span class="desc">「あ・い・う・べ」と口を大きく動かします</span>
+      </a></li>
+    </ul>
+
+    <h2>はかる</h2>
+    <ul class="tiles">
+      <li><a class="tile tile--measure" href="/steptest/">
+        <span class="icon" aria-hidden="true">⏱️</span>
+        <span class="name">2分間足踏みテスト</span>
+        <span class="desc">その場足踏みの回数を数えます</span>
+      </a></li>
+      <li><a class="tile tile--measure" href="/chair-stand/">
+        <span class="icon" aria-hidden="true">🪑</span>
+        <span class="name">5回椅子立ち上がり</span>
+        <span class="desc">立ち座り5回にかかる時間を計ります</span>
+      </a></li>
+    </ul>
+
+    <h2>きろく</h2>
+    <ul class="tiles">
+      <li><div class="tile tile--soon">
+        <span class="badge">準備中</span>
+        <span class="name">利用者の登録・記録</span>
+        <span class="desc">利用者を登録すると、毎日の運動や測定の記録を残せるようになります</span>
+      </div></li>
+    </ul>
+  </main>
+
+  <footer>
+    <p>各アプリの記録はこの端末のブラウザにのみ保存されます。カメラの映像は保存も送信もしません。</p>
+  </footer>
+</body>
+</html>
