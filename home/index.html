@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>kinetone</title>
-<meta name="description" content="カメラ 1 台で遊べる運動アプリ集">
+<title>KINETONE：キネトーン　高齢者向け体感ゲーム</title>
+<meta name="description" content="KINETONE（キネトーン）— カメラ 1 台で遊べる高齢者向け体感ゲーム">
 <style>
   :root{
     --bg-1:#0d1726;
@@ -29,9 +29,11 @@
   .wrap{max-width:1240px;margin:0 auto;}
 
   /* 見出しは小さく。1画面のうちタイルに使える面積を最優先する */
-  header{display:flex;align-items:baseline;gap:.9em;flex-wrap:wrap;margin-bottom:clamp(12px,2vh,20px);}
-  .brand{margin:0;font-size:clamp(14px,1.7vw,18px);letter-spacing:.3em;color:var(--accent);text-transform:uppercase;}
-  .tagline{margin:0;color:var(--text-dim);font-size:clamp(12px,1.5vw,15px);}
+  header{display:flex;align-items:baseline;gap:.5em 1em;flex-wrap:wrap;margin-bottom:clamp(12px,2vh,20px);}
+  h1{margin:0;font-size:clamp(18px,2.4vw,26px);font-weight:800;letter-spacing:.02em;}
+  h1 .brand{color:var(--accent);letter-spacing:.18em;}
+  h1 .kana{color:var(--text-dim);font-weight:700;font-size:.8em;letter-spacing:.06em;}
+  .note{margin:0;color:var(--text-dim);font-size:clamp(12px,1.5vw,15px);}
 
   h2{display:flex;align-items:center;gap:.6em;
      font-size:clamp(16px,2.1vw,22px);font-weight:800;letter-spacing:.1em;color:var(--text);
@@ -73,8 +75,8 @@
 <body>
 <div class="wrap">
   <header>
-    <p class="brand">kinetone</p>
-    <p class="tagline">カメラに映るだけで遊べます。映像はこの端末の中だけで使い、外には送りません。</p>
+    <h1><span class="brand">KINETONE</span><span class="kana">：キネトーン</span>　高齢者向け体感ゲーム</h1>
+    <p class="note">カメラに映るだけで遊べます。映像はこの端末の中だけで使い、外には送りません。</p>
   </header>
 
   <main>
