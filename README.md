@@ -15,7 +15,7 @@
 | `aiube-exercise-avatar/` | あいうべ体操デモ・アバター版（静的サイト） | MediaPipe Face Landmarker | https://aiube-taisou-demo.web.app |
 | `hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる静的サイト） | TensorFlow.js MoveNet MultiPose | https://kinetone-hanabi.web.app |
 | `chair-stand-test/` | 5回椅子立ち上がりテスト（FTSST）の測定アプリ | MediaPipe Tasks Vision | https://kinetone-chairstand.web.app |
-| `multi-flower/` | アトラクト画面（多人数骨格 × 花の演出）※ 準備でき次第このリポジトリに取り込み | TensorFlow.js MoveNet | 未デプロイ |
+| `multi-flower/` | みんなの花畑（体を動かすと足元に花が育つ演出。ペット・BGM・効果音つき） | MediaPipe（既定）/ MoveNet 切替可 | https://kinetone-multi-flower.web.app |
 
 各アプリは独立しています（`stepping/` `chair-stand-test/` `multi-flower/` は Vite プロジェクト、
 `aiube-exercise*/` と `hanabi/` はビルド不要の静的サイト）。依存関係もビルドも配信先も別々なので、
@@ -31,6 +31,7 @@
 | `aiube-taisou-demo` | `aiube-taisou-demo` | （既定） | `aiube-exercise-avatar/public/` | https://aiube-taisou-demo.web.app |
 | `kinetone-hanabi` | `kinetone-hanabi` | （既定） | `hanabi/`（開発用ファイルは除外） | https://kinetone-hanabi.web.app |
 | `kinetone-chairstand` | `kinetone-chairstand` | （既定） | `chair-stand-test/dist/` | https://kinetone-chairstand.web.app |
+| `kinetone-multi-flower` | `kinetone-multi-flower` | （既定） | `multi-flower/dist/` | https://kinetone-multi-flower.web.app |
 
 stepping の 2 サイトは同じ Firebase プロジェクト **`kinetone-stepping`**（プロジェクト番号 708164199952）内の
 2 サイトです。`measure.html` を `index.html` として置いた `dist-measure/` を測定サイトに配信することで、
@@ -40,8 +41,9 @@ stepping の 2 サイトは同じ Firebase プロジェクト **`kinetone-steppi
 フェイスメッシュ版とアバター版をそれぞれ別サイトに配信しています。
 2 つの差分は `public/index.html` だけなので、判定ロジックを直すときは両方に反映してください。
 
-multi-flower は `.firebaserc` に `kinetone-multi-flower` と書かれていますが、
-**その Firebase プロジェクトはまだ作成されていません**（初回デプロイ時に作成が必要）。
+multi-flower は Firebase プロジェクト **`kinetone-multi-flower`** を作成し、
+https://kinetone-multi-flower.web.app に公開済みです（既定サイト・配信元 `multi-flower/dist/`）。
+カメラ至近の一人が主なので既定エンジンは MediaPipe。展示会の多人数用途は `?engine=movenet`。
 
 ```bash
 cd stepping
@@ -60,21 +62,11 @@ npx firebase-tools deploy --only hosting:measure # 測定（kinetone-steptest）
 cd aiube-exercise        && npx firebase-tools deploy --only hosting  # あいうべ体操・メッシュ版（ビルド不要）
 cd aiube-exercise-avatar && npx firebase-tools deploy --only hosting  # あいうべ体操・アバター版（ビルド不要）
 cd hanabi                && npx firebase-tools deploy --only hosting  # みんなで花火（ビルド不要）
+
+cd multi-flower          && npm run deploy                            # みんなの花畑（kinetone-multi-flower）
 ```
 
 詳しい仕様・設計は各フォルダの README を参照してください。
-
-## multi-flower の取り込み方（未実施）
-
-いまは `multi-flower/` を独立したリポジトリのまま置いてあり、ルートの `.gitignore` で
-追跡対象から外しています。準備ができたら、未コミットの変更を先にコミットしたうえで、
-履歴ごと取り込みます。
-
-```bash
-# 1. ルートの .gitignore から /multi-flower/ の行を消す
-# 2. 履歴を保ったまま取り込む
-git subtree add --prefix=multi-flower ./multi-flower main
-```
 
 ## リポジトリの方針
 
@@ -82,4 +74,6 @@ git subtree add --prefix=multi-flower ./multi-flower main
   未使用の素材は `.gitignore` で除外しています（例: `stepping/assets/BGM/`）。
   曲を差し替えるときは、その曲だけ明示的に `git add` してください。
 - **モデル・WASM は追跡しない。** `npm run setup:mediapipe` などのスクリプトで再取得できます。
+  ただし **multi-flower は現状オフライン優先でモデル・WASM も追跡しています**（数十MB）。
+  リポジトリ軽量化のため、他アプリと同様に setup スクリプトでの再取得へ揃えるのが望ましい（要検討）。
 - **ビルド成果物（`dist/`）は追跡しない。** 配信は各アプリの predeploy でビルドしてから行います。
