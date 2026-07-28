@@ -56,7 +56,7 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 | `aiube-taisou-demo` | `aiube-taisou-demo` | （既定） | `aiube-exercise-avatar/public/` | https://aiube-taisou-demo.web.app |
 | `kinetone-hanabi` | `kinetone-hanabi` | （既定） | `hanabi/`（開発用ファイルは除外） | https://kinetone-hanabi.web.app |
 | `kinetone-chairstand` | `kinetone-chairstand` | （既定） | `chair-stand-test/dist/` | https://kinetone-chairstand.web.app |
-| `kinetone-multi-flower` | `kinetone-multi-flower` | （既定） | `multi-flower/dist/` | https://kinetone-multi-flower.web.app |
+| `kinetone-multi-flower` | `kinetone-multi-flower` | （既定） | `multi-flower/dist/` | https://kinetone-multi-flower.web.app （**使っていない**。`npm run deploy:standalone` のときだけ） |
 
 stepping の 2 サイトは同じ Firebase プロジェクト **`kinetone-stepping`**（プロジェクト番号 708164199952）内の
 2 サイトです。`measure.html` を `index.html` として置いた `dist-measure/` を測定サイトに配信することで、
@@ -88,8 +88,13 @@ cd aiube-exercise        && npx firebase-tools deploy --only hosting  # あい�
 cd aiube-exercise-avatar && npx firebase-tools deploy --only hosting  # あいうべ体操・アバター版（ビルド不要）
 cd hanabi                && npx firebase-tools deploy --only hosting  # みんなで花火（ビルド不要）
 
-cd multi-flower          && npm run deploy                            # みんなの花畑（kinetone-multi-flower）
+cd multi-flower          && npm run deploy                            # みんなの花畑 → 統合サイト（下記）
 ```
+
+みんなの花畑は単体サイトを使わなくなったので、`npm run deploy` は**統合サイト**へ配信します
+（リポジトリ直下の `npx firebase-tools deploy --only hosting` を呼ぶだけ）。全アプリが
+まとめてビルドし直されるため、他のアプリの作業中の変更も一緒に公開される点に注意。
+単体サイトへ出したいときだけ `npm run deploy:standalone`。
 
 詳しい仕様・設計は各フォルダの README を参照してください。
 
