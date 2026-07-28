@@ -1,7 +1,3 @@
 .DS_Store
 node_modules
 
-# multi-flower はまだ独立したリポジトリのまま。
-# 準備ができたら `git subtree add --prefix=multi-flower <path> main` で履歴ごと取り込み、
-# この行を消す。
-/multi-flower/
