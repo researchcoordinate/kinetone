@@ -42,10 +42,15 @@
      margin:clamp(14px,2.4vh,24px) 0 clamp(8px,1.4vh,14px);}
   h2::after{content:"";flex:1;height:1px;background:var(--line);}
 
+  /* grid-auto-rows:1fr で全ての行を同じ高さにする。名前や説明の行数が違っても
+     カードの大きさが揃い、並べたときに凸凹しない */
   .tiles{display:grid;gap:clamp(10px,1.4vw,18px);
          grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));
+         grid-auto-rows:1fr;
          list-style:none;padding:0;margin:0;}
-  .tile{display:block;text-decoration:none;color:inherit;
+  /* カードは <li> の高さいっぱいまで伸ばす（<a> のままだと中身の分しか伸びない） */
+  .tiles > li{display:flex;}
+  .tile{display:flex;flex-direction:column;width:100%;text-decoration:none;color:inherit;
         background:var(--card);border-radius:18px;overflow:hidden;
         box-shadow:0 6px 18px #1822341a, inset 0 0 0 1px var(--line);
         transition:background .15s ease, transform .08s ease;}
@@ -53,9 +58,10 @@
   .tile:active{transform:translateY(2px);}
   .tile:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
   /* サムネイルは 16:9 で書き出してあるので、幅だけ合わせれば切れずに収まる */
-  .tile img{display:block;width:100%;height:auto;background:#e7ebf2;}
-  /* span のままだと中のブロック要素に左右の padding が効かないので block にする */
-  .tile .body{display:block;padding:clamp(12px,1.6vw,18px) clamp(16px,2vw,22px) clamp(14px,2vw,20px);}
+  .tile img{display:block;flex:0 0 auto;width:100%;height:auto;background:#e7ebf2;}
+  /* span のままだと中のブロック要素に左右の padding が効かないので block にする。
+     余った高さはここで受けて、カードの下端まで白地を伸ばす */
+  .tile .body{display:block;flex:1;padding:clamp(12px,1.6vw,18px) clamp(16px,2vw,22px) clamp(14px,2vw,20px);}
   /* どこを動かす遊びか・何人で遊ぶかを一目で分かるように */
   .tile .tags{display:flex;flex-wrap:wrap;gap:.4em;margin-bottom:.55em;}
   .tile .tag{display:inline-block;
