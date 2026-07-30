@@ -63,6 +63,15 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 
 各アプリは**単体サイトとしても**ビルドできます（`KINETONE_BASE` 未指定なら base は `/`）。
 
+## 共通モジュール（`packages/`）
+
+アプリをまたいで同じであるべきものは `packages/` に置き、各アプリは
+`file:` 依存（`npm install` で symlink）で取り込みます。
+
+| パッケージ | 中身 |
+|---|---|
+| [`@kinetone/camera`](./packages/camera/) | カメラの選択・保存・再接続と、歯車の設定パネル。依存なし・素の ES モジュールなので、Vite のアプリからもビルドの無い静的サイトからも使えます |
+
 ## 収録アプリ
 
 | フォルダ | 統合サイトのパス | 内容 | 姿勢推定 |
