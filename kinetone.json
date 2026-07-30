@@ -13,6 +13,19 @@
     "        2 分間足踏みテストの 2 枚）。"
   ],
 
+  "$shared": [
+    "ホームが直接読む共通モジュール。各アプリは npm の依存（git URL + タグ）で",
+    "同じものを取り込むので、ここで指定するのはホーム用の配布だけ。",
+    "タグを上げたいときはこの tag を書き換える。"
+  ],
+  "shared": {
+    "camera": {
+      "repo": "researchcoordinate/kinetone-camera",
+      "tag": "v0.1.0",
+      "files": ["index.js", "camera.js", "settings.js"]
+    }
+  },
+
   "groups": [
     { "id": "play", "title": "あそぶ" },
     { "id": "measure", "title": "はかる", "tileClass": "tile--measure" }

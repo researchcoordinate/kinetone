@@ -96,15 +96,41 @@ ${list.map((card) => renderCard(card, group)).join('\n')}
 
 /**
  * ホームが直接読む共通モジュールを配る。
+ *
  * ホームはビルドの無い静的ページなので、<script type="module"> で site/shared/ から読む。
- * Vite の各アプリは npm の file: 依存で同じものを取り込むので、ここでは配るだけ。
+ * Vite の各アプリは npm の依存（同じ公開リポジトリの同じタグ）で取り込むので、
+ * ここで面倒をみるのはホーム用の配布だけ。取り込むタグは kinetone.json が決める。
  */
 async function copySharedModules() {
-  const to = resolve(site, 'shared/camera')
-  await mkdir(to, { recursive: true })
-  for (const file of ['index.js', 'camera.js', 'settings.js']) {
-    await cp(resolve(root, 'packages/camera', file), resolve(to, file))
+  for (const [name, spec] of Object.entries(manifest.shared ?? {})) {
+    console.log(`\n▶ 共通モジュール ${spec.repo} ${spec.tag} を取得`)
+    const from = await fetchTag(spec)
+    const to = resolve(site, 'shared', name)
+    await mkdir(to, { recursive: true })
+    for (const file of spec.files) {
+      await cp(resolve(from, file), resolve(to, file))
+    }
   }
+}
+
+/**
+ * 公開リポジトリのタグ付きソースを取ってくる。
+ * public なので認証は要らない（開発者ごとのトークン設定を増やさないため public にしてある）。
+ */
+async function fetchTag({ repo, tag }) {
+  const cacheDir = resolve(root, '.cache/shared', repo.replace('/', '__'), tag)
+  const unpacked = resolve(cacheDir, 'src')
+  if (await exists(unpacked)) {
+    console.log('  ・キャッシュを使います')
+    return unpacked
+  }
+  await mkdir(unpacked, { recursive: true })
+  const url = `https://github.com/${repo}/archive/refs/tags/${tag}.tar.gz`
+  const tgz = resolve(cacheDir, 'src.tar.gz')
+  run('curl', ['-fsSL', url, '-o', tgz], root)
+  // 先頭のディレクトリ（<repo>-<tag>/）を剥がして中身だけ取り出す
+  run('tar', ['-xzf', tgz, '-C', unpacked, '--strip-components=1'], root)
+  return unpacked
 }
 
 /** home/index.html の目印を、生成したカードに差し替える。 */

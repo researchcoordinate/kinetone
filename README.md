@@ -63,19 +63,33 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 
 各アプリは**単体サイトとしても**ビルドできます（`KINETONE_BASE` 未指定なら base は `/`）。
 
-## 共通モジュール（`packages/`）
+## 共通モジュール
 
-アプリをまたいで同じであるべきものは `packages/` に置き、各アプリは
-`file:` 依存（`npm install` で symlink）で取り込みます。
+アプリをまたいで同じであるべきものは、別リポジトリに置いてタグで固定して取り込みます。
+アプリを 1 つずつ別リポジトリへ分けていく方針なので、隣のフォルダを参照する形
+（`file:`）にはしません。
 
-| パッケージ | 中身 |
+| モジュール | 中身 |
 |---|---|
-| [`@kinetone/camera`](./packages/camera/) | カメラの選択・保存・再接続と、歯車の設定パネル。依存なし・素の ES モジュールなので、Vite のアプリからもビルドの無い静的サイトからも使えます |
+| [`@kinetone/camera`](https://github.com/researchcoordinate/kinetone-camera) | カメラの選択・保存・再接続と、歯車の設定パネル。依存なし・素の ES モジュールなので、Vite のアプリからもビルドの無い静的サイトからも使えます |
+
+Vite の各アプリは npm の依存として取り込みます。**public リポジトリなので、
+開発者ごと・CI ごとのトークン設定は要りません。**
+
+```jsonc
+"@kinetone/camera": "github:researchcoordinate/kinetone-camera#v0.1.0"
+```
+
+ホームはビルドが無いので、`build-site.mjs` が同じタグのソースを取得して
+`site/shared/camera/` に置き、`<script type="module">` で読みます。取り込むタグは
+`kinetone.json` の `shared` が決めます（`.cache/shared/` にキャッシュします）。
+
+あいうべ体操の 2 つは、ビルドが無く単体でも動かせるようにするため、
+`public/shared/camera/` にファイルを同梱しています（更新時は手で入れ替えます）。
 
 **カメラの選択は全アプリで共通です。**ホーム画面の右下の小さな歯車で 1 回選べば、
 どのゲームでもそのカメラで開きます（施設や展示で使うカメラは 1 台なので、アプリごとに
-選ばせる意味がありません）。ホームはビルドが無いので、`build-site.mjs` が
-`packages/camera/` を `site/shared/camera/` に配り、`<script type="module">` で読みます。
+選ばせる意味がありません）。
 
 ## 収録アプリ
 
