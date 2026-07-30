@@ -110,7 +110,14 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 - **大きな素材は「使うものだけ」追跡する。** 音声・動画・BGM はリポジトリを重くするため、
   未使用の素材は `.gitignore` で除外しています（例: `stepping/assets/BGM/`）。
   曲を差し替えるときは、その曲だけ明示的に `git add` してください。
-- **モデル・WASM は追跡しない。** `npm run setup:mediapipe` などのスクリプトで再取得できます。
-  ただし **multi-flower は現状オフライン優先でモデル・WASM も追跡しています**（数十MB）。
-  リポジトリ軽量化のため、他アプリと同様に setup スクリプトでの再取得へ揃えるのが望ましい（要検討）。
+- **モデル・WASM は原則追跡しない。** `npm run setup:mediapipe` などのスクリプトで再取得できます。
+  ただし例外が 2 つあります。
+  - **multi-flower** は現状オフライン優先でモデル・WASM も追跡しています（数十MB）。
+  - **hanabi** はビルドの無い静的サイトで、clone してそのまま動く状態を保ちたいため、
+    TensorFlow.js とモデルを `assets/vendor/` `assets/models/` に追跡しています（約 10MB）。
+    更新は `npm run fetch:vendor -- --force`。
+- **実行時に外部のCDNやモデル配信元へ取りに行かない。** hanabi は以前 jsDelivr と tfhub.dev から
+  実行時に読み込んでいましたが、tfhub.dev が廃止されて kaggle.com へリダイレクトされるように
+  なり、社内ネットワークのフィルタで止められると起動できませんでした。開発機ではブラウザ
+  キャッシュに残っていて気づけないため、**必ず同梱**してください。
 - **ビルド成果物（`dist/`）は追跡しない。** 配信は各アプリの predeploy でビルドしてから行います。
