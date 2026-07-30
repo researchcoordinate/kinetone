@@ -37,8 +37,17 @@
       "spa": true
     },
     "hanabi": {
-      "$comment": "開発用のファイルが同じ階層にあるので、配信するものだけ files で選ぶ",
-      "build": { "kind": "static", "dir": "hanabi", "files": ["hanabi_game.html", "assets"] },
+      "$comment": [
+        "別リポジトリへ切り出し済み。ビルド済みの成果物（Release の zip）を取り込む。",
+        "本番に出すバージョンはこの tag で決まる。上げたいときは tag を書き換えてデプロイ、",
+        "戻したいときは前の tag に戻すだけ。向こうでタグを打っただけでは本番は変わらない。"
+      ],
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/hanabi",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
       "entry": "hanabi_game.html"
     },
     "aiube": {

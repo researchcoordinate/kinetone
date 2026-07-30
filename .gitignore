@@ -7,3 +7,6 @@ node_modules
 
 # Firebase デプロイキャッシュ
 .firebase/
+
+# 別リポジトリから取得した成果物のキャッシュ
+/.cache/

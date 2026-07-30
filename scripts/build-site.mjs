@@ -151,8 +151,9 @@ async function syncFirebaseConfig() {
 
 async function buildApp(app) {
   const { build } = app
-  const from = resolve(root, build.dir)
   const to = resolve(site, app.id)
+  // dir はこのリポジトリの中にあるものだけが持つ（github-release には無い）
+  const from = build.dir ? resolve(root, build.dir) : null
 
   if (build.kind === 'vite') {
     const path = `/${app.id}/`
@@ -184,8 +185,43 @@ async function buildApp(app) {
     return
   }
 
-  // 別リポジトリへ出したゲームは、ビルド済みの成果物を取ってくる形にする予定
+  if (build.kind === 'github-release') {
+    console.log(`\n▶ ${build.repo} ${build.tag} を取得`)
+    const dir = await fetchRelease(build)
+    await cp(dir, to, { recursive: true })
+    return
+  }
+
   throw new Error(`${app.id}: 未対応の build.kind です（${build.kind}）`)
+}
+
+/**
+ * 別リポジトリの GitHub Release から、ビルド済みの成果物を取ってくる。
+ *
+ * ソースからビルドしないのが要点。各自が好きなときに publish でき、
+ * 他人の作業中のコードが統合サイトに混ざらない。壊れたゲームがあっても
+ * 統合サイトのビルドは落ちない（tag を戻すだけで復旧できる）。
+ *
+ * 取得は gh CLI に任せる。開発者はすでに GitHub の認証を持っているので、
+ * private リポジトリでも追加のトークン設定が要らない。
+ */
+async function fetchRelease({ repo, tag, asset }) {
+  const cacheDir = resolve(root, '.cache/artifacts', repo.replace('/', '__'), tag)
+  const unpacked = resolve(cacheDir, 'unpacked')
+  // tag ごとにキャッシュする（同じ tag の中身は変わらない前提）
+  if (await exists(unpacked)) {
+    console.log('  ・キャッシュを使います')
+    return unpacked
+  }
+
+  await mkdir(cacheDir, { recursive: true })
+  const zip = resolve(cacheDir, asset)
+  if (!(await exists(zip))) {
+    run('gh', ['release', 'download', tag, '--repo', repo, '--pattern', asset, '--dir', cacheDir], root)
+  }
+  await mkdir(unpacked, { recursive: true })
+  run('unzip', ['-q', '-o', zip, '-d', unpacked], root)
+  return unpacked
 }
 
 // ---------------------------------------------------------------------------

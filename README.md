@@ -3,7 +3,9 @@
 介護施設・サ高住向けの運動アプリ群です。Web カメラ 1 台とブラウザだけで動き、
 **カメラ映像はすべて端末内で処理し、外部に送信も保存もしません**（バックエンド無し）。
 
-共通のホーム画面から各ゲームへ遷移する構成を予定しており、この 1 リポジトリで管理します。
+共通のホーム画面から各ゲームへ遷移する構成です。ゲームは開発者ごとに独立したリポジトリへ
+移していく途中で、このリポジトリは**ホームと、まだ移していないゲーム**を持ちます。
+何を配信するかは `kinetone.json` が決めます。
 
 ## 配信構成（統合サイト）
 
@@ -24,9 +26,30 @@
 | 名前・説明・タグを直す | 該当する `cards` の項目 |
 | 開発中のゲームを配信から外す | その `apps` に `"enabled": false`（いまは `block` がこれ） |
 
-`apps.<id>.build.kind` が「どこから持ってくるか」です。いまは全部このリポジトリの中
-（`vite` / `static`）ですが、別リポジトリへ出したゲームは `kind` を成果物取得に変える
-だけで済むようにしてあります。**ゲームを 1 つずつ、好きな順番で外部リポジトリへ移せます。**
+`apps.<id>.build.kind` が「どこから持ってくるか」です。
+
+| `kind` | 意味 |
+|---|---|
+| `vite` | このリポジトリの Vite プロジェクトをビルドする |
+| `static` | このリポジトリの静的ファイルをコピーする |
+| `github-release` | **別リポジトリの Release からビルド済みの zip を取り込む** |
+
+`github-release` は `tag` でバージョンを固定するので、**他の開発者の作業中コードが
+本番に混ざりません**。取得は `gh` CLI に任せているため、private リポジトリでも
+開発者ごとのトークン設定は不要です（既存の GitHub 認証をそのまま使います）。
+zip は `.cache/artifacts/` にキャッシュします。
+
+```jsonc
+"hanabi": {
+  "build": { "kind": "github-release", "repo": "researchcoordinate/hanabi",
+             "tag": "v0.1.0", "asset": "dist.zip" },
+  "entry": "hanabi_game.html"
+}
+```
+
+ゲーム側でタグを打っただけでは本番は変わりません。**ここの `tag` を上げてデプロイした
+時点で反映**され、戻したいときは前の `tag` に戻すだけです。
+**ゲームは 1 つずつ、好きな順番で外部リポジトリへ移せます。**
 
 ```bash
 node scripts/build-site.mjs                # site/ を作る（各アプリをサブパス向けにビルド）
@@ -45,7 +68,7 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 | フォルダ | 統合サイトのパス | 内容 | 姿勢推定 |
 |---|---|---|---|
 | `multi-flower/` | `/flower/` | みんなの花畑（体を動かすと足元に花が育つ演出。ペット・BGM・効果音つき） | MediaPipe（既定）/ MoveNet 切替可 |
-| `hanabi/` | `/hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる静的サイト） | TensorFlow.js MoveNet MultiPose |
+| **別リポジトリ** [`researchcoordinate/hanabi`](https://github.com/researchcoordinate/hanabi) | `/hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる静的サイト） | TensorFlow.js MoveNet MultiPose |
 | `stepping/` | `/stepping/` | おさんぽ足踏み（その場足踏みリハビリゲーム） | MediaPipe Tasks Vision |
 | `stepping/` | `/steptest/` | 2分間足踏みテストの測定アプリ（同じソースの `measure.html`） | MediaPipe Tasks Vision |
 | `chair-stand-test/` | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST）の測定アプリ | MediaPipe Tasks Vision |
@@ -53,8 +76,8 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 | `aiube-exercise/` | `/aiube/` | あいうべ体操・フェイスメッシュ版（静的サイト） | MediaPipe Face Landmarker |
 | `block/` | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） | MediaPipe Tasks Vision |
 
-各アプリは独立しています（`stepping/` `chair-stand-test/` `multi-flower/` は Vite プロジェクト、
-`aiube-exercise*/` と `hanabi/` はビルド不要の静的サイト）。依存関係もビルドも配信先も別々なので、
+各アプリは独立しています（`stepping/` `chair-stand-test/` `multi-flower/` `block/` は Vite
+プロジェクト、`aiube-exercise*/` はビルド不要の静的サイト）。依存関係もビルドも別々なので、
 **作業はそのフォルダの中で行います**（リポジトリのルートに `package.json` は置いていません）。
 
 ### 旧配信先（1 ゲーム 1 プロジェクト時代の名残り）
@@ -74,10 +97,10 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 | aiube-taisou-demo.web.app | `/aiube-avatar/` | `aiube-taisou-demo` |
 | aiube-mesh-demo.web.app | `/aiube/` | `aiube-taisou-demo` |
 
-> **注意**: 各アプリのフォルダには当時の `firebase.json` が残っています。フォルダの中で
-> `npx firebase-tools deploy` を実行すると、この案内ページを**古いアプリで上書きしてしまいます**。
-> 配信は必ずリポジトリ直下から行ってください。上書きしてしまった場合は
-> `node scripts/legacy-redirect.mjs` で戻せます。
+> **注意**: このリポジトリに残る各アプリのフォルダには当時の `firebase.json` があります。
+> フォルダの中で `npx firebase-tools deploy` を実行すると、この案内ページを**古いアプリで
+> 上書きしてしまいます**。配信は必ずリポジトリ直下から行ってください。上書きしてしまった
+> 場合は `node scripts/legacy-redirect.mjs` で戻せます。
 
 あいうべ体操のメッシュ版とアバター版の差分は `public/index.html` だけなので、
 判定ロジックを直すときは両方に反映してください。
@@ -98,10 +121,10 @@ npm run dev
 npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeploy で全アプリをビルド）
 ```
 
-いまは全アプリがまとめてビルドし直されるため、**他のアプリの作業中の変更も一緒に公開されます**。
-出したくないものは `kinetone.json` で `"enabled": false` にしてください。
-（この結合を無くすため、ゲームごとに「ビルド済み成果物を publish → 統合サイトはそれを取り込む」
-形へ移行する予定です。`build.kind` がその切り替え口になります。）
+**このリポジトリに残っているアプリは、まとめてビルドし直されます。**そのため作業中の変更も
+一緒に公開されてしまいます。出したくないものは `kinetone.json` で `"enabled": false` に
+してください。`github-release` へ移したゲーム（hanabi）はこの影響を受けません（固定した
+`tag` の成果物しか取り込まないため）。**残りのゲームも順に移していく方針です。**
 
 詳しい仕様・設計は各フォルダの README を参照してください。
 
@@ -113,9 +136,8 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 - **モデル・WASM は原則追跡しない。** `npm run setup:mediapipe` などのスクリプトで再取得できます。
   ただし例外が 2 つあります。
   - **multi-flower** は現状オフライン優先でモデル・WASM も追跡しています（数十MB）。
-  - **hanabi** はビルドの無い静的サイトで、clone してそのまま動く状態を保ちたいため、
-    TensorFlow.js とモデルを `assets/vendor/` `assets/models/` に追跡しています（約 10MB）。
-    更新は `npm run fetch:vendor -- --force`。
+  - **hanabi**（別リポジトリ）はビルドの無い静的サイトで、clone してそのまま動く状態を
+    保ちたいため、TensorFlow.js とモデルを追跡しています（約 10MB）。
 - **実行時に外部のCDNやモデル配信元へ取りに行かない。** hanabi は以前 jsDelivr と tfhub.dev から
   実行時に読み込んでいましたが、tfhub.dev が廃止されて kaggle.com へリダイレクトされるように
   なり、社内ネットワークのフィルタで止められると起動できませんでした。開発機ではブラウザ
