@@ -72,6 +72,11 @@ npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeplo
 |---|---|
 | [`@kinetone/camera`](./packages/camera/) | カメラの選択・保存・再接続と、歯車の設定パネル。依存なし・素の ES モジュールなので、Vite のアプリからもビルドの無い静的サイトからも使えます |
 
+**カメラの選択は全アプリで共通です。**ホーム画面の右下の小さな歯車で 1 回選べば、
+どのゲームでもそのカメラで開きます（施設や展示で使うカメラは 1 台なので、アプリごとに
+選ばせる意味がありません）。ホームはビルドが無いので、`build-site.mjs` が
+`packages/camera/` を `site/shared/camera/` に配り、`<script type="module">` で読みます。
+
 ## 収録アプリ
 
 | フォルダ | 統合サイトのパス | 内容 | 姿勢推定 |

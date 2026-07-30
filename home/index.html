@@ -113,5 +113,16 @@
     <p>記録はこの端末のブラウザにのみ保存されます。カメラの映像は保存も送信もしません。</p>
   </footer>
 </div>
+
+<!--
+  カメラの選択（右下の小さな歯車）。
+  施設や展示で使うカメラは 1 台なので、ここで 1 回選べば全部のゲームに効く
+  （選択は localStorage の共通キーに入り、各ゲームがそれを読む）。
+  ホームには映像の使い手がいないので、閉じたらカメラを止める。
+-->
+<script type="module">
+  import { createCameraManager, mountCameraSettings } from './shared/camera/index.js'
+  mountCameraSettings(createCameraManager(), { stopOnClose: true })
+</script>
 </body>
 </html>

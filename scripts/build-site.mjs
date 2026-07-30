@@ -94,6 +94,19 @@ ${list.map((card) => renderCard(card, group)).join('\n')}
     .join('\n\n')
 }
 
+/**
+ * ホームが直接読む共通モジュールを配る。
+ * ホームはビルドの無い静的ページなので、<script type="module"> で site/shared/ から読む。
+ * Vite の各アプリは npm の file: 依存で同じものを取り込むので、ここでは配るだけ。
+ */
+async function copySharedModules() {
+  const to = resolve(site, 'shared/camera')
+  await mkdir(to, { recursive: true })
+  for (const file of ['index.js', 'camera.js', 'settings.js']) {
+    await cp(resolve(root, 'packages/camera', file), resolve(to, file))
+  }
+}
+
 /** home/index.html の目印を、生成したカードに差し替える。 */
 async function buildHome() {
   const template = await readFile(resolve(root, 'home/index.html'), 'utf8')
@@ -237,6 +250,7 @@ for (const app of apps) {
 
 console.log('\n▶ ホーム画面を組み立て')
 await buildHome()
+await copySharedModules()
 
 for (const [id] of skipped) {
   console.log(`  － ${id} は enabled: false のため載せていません`)
