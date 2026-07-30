@@ -5,47 +5,41 @@
  * 同じ origin に載っている必要がある（localStorage はサイトごとに分かれるため）。
  * そこで、それぞれをサブパス向けにビルドして site/ の下に並べる。
  *
- *   site/                 ホーム（アプリ選択）
- *   site/flower/          みんなの花畑
- *   site/stepping/        おさんぽ足踏み（measure.html が 2 分間足踏みテスト）
- *   site/chair-stand/     5 回椅子立ち上がりテスト
- *   site/hanabi/          みんなで花火
- *   site/aiube/           あいうべ体操（フェイスメッシュ版）
- *   site/aiube-avatar/    あいうべ体操（アバター版）
+ * **何を載せるかは kinetone.json だけが決める。**このスクリプトにアプリ名は書かない。
+ * ゲームを増やす・並べ替える・一時的に外すときは kinetone.json を直す。
+ *
+ *   site/                 ホーム（kinetone.json からカードを生成）
+ *   site/<app id>/        各アプリ
  *
  * Vite プロジェクトには KINETONE_BASE でサブパスを渡す（vite.config.ts が読む）。
  * 静的サイトは相対パスで書かれているので、そのままコピーするだけで動く。
+ *
+ * firebase.json の rewrites も kinetone.json から決まる。ただし Firebase CLI は
+ * デプロイ開始時に firebase.json を読むので、predeploy でここが書き換えても
+ * 次回デプロイまで反映されない。そのため既定では**食い違いを検出して止める**だけにし、
+ * 書き換えは明示的に `--write-config` を付けたときだけ行う。
  */
 import { execFileSync } from 'node:child_process'
-import { cp, mkdir, rm, stat } from 'node:fs/promises'
+import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const site = resolve(root, 'site')
+const writeConfig = process.argv.includes('--write-config')
 
-/** Vite プロジェクト（ビルドしてから dist を置く） */
-const VITE_APPS = [
-  { dir: 'multi-flower', out: 'flower', path: '/flower/', post: ['scripts/build-service-worker.mjs'] },
-  { dir: 'stepping', path: '/stepping/', setup: 'setup:mediapipe', needs: 'public/mediapipe' },
-  {
-    dir: 'chair-stand-test',
-    out: 'chair-stand',
-    path: '/chair-stand/',
-    setup: 'setup:mediapipe',
-    needs: 'public/mediapipe',
-  },
-]
+const manifest = JSON.parse(await readFile(resolve(root, 'kinetone.json'), 'utf8'))
 
-/** ビルド不要の静的サイト（そのままコピー） */
-const STATIC_APPS = [
-  { dir: 'hanabi', out: 'hanabi' },
-  { dir: 'aiube-exercise/public', out: 'aiube' },
-  { dir: 'aiube-exercise-avatar/public', out: 'aiube-avatar' },
-]
+/** 配信するアプリ（enabled: false は開発中なので載せない）。 */
+const apps = Object.entries(manifest.apps)
+  .filter(([, app]) => app.enabled !== false)
+  .map(([id, app]) => ({ id, ...app }))
 
-/** hanabi は開発用ファイルが同じ階層にあるので、配信するものだけ選ぶ */
-const HANABI_FILES = ['hanabi_game.html', 'assets']
+const appById = new Map(apps.map((app) => [app.id, app]))
+const cards = manifest.cards.filter((card) => appById.has(card.app))
+
+const skipped = Object.entries(manifest.apps).filter(([, app]) => app.enabled === false)
+const hiddenCards = manifest.cards.filter((card) => !appById.has(card.app))
 
 const exists = async (p) => {
   try {
@@ -59,40 +53,163 @@ const exists = async (p) => {
 const run = (cmd, args, cwd, env = {}) =>
   execFileSync(cmd, args, { cwd, stdio: 'inherit', env: { ...process.env, ...env } })
 
+const escape = (s) =>
+  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+// ---------------------------------------------------------------------------
+// ホーム画面（カードを kinetone.json から組み立てる）
+// ---------------------------------------------------------------------------
+
+/** カードの中の URL。指定が無ければ /<app id>/。 */
+const cardUrl = (card) => card.url ?? `/${card.app}/`
+
+function renderCard(card, group) {
+  const tileClass = ['tile', group.tileClass].filter(Boolean).join(' ')
+  const tags = [
+    `<span class="tag">${escape(card.tag)}</span>`,
+    card.people === 'group' ? '<span class="tag tag--group">みんなで</span>' : '',
+    card.people === 'solo' ? '<span class="tag tag--solo">ひとりで</span>' : '',
+  ].join('')
+  return `      <li><a class="${tileClass}" href="${escape(cardUrl(card))}">
+        <img src="thumbs/${escape(card.thumb)}" alt="" width="480" height="270">
+        <span class="body">
+          <span class="tags">${tags}</span>
+          <span class="name">${escape(card.name)}</span>
+          <span class="desc">${escape(card.desc)}</span>
+        </span>
+      </a></li>`
+}
+
+function renderCards() {
+  return manifest.groups
+    .map((group) => {
+      const list = cards.filter((card) => card.group === group.id)
+      if (list.length === 0) return ''
+      return `    <h2>${escape(group.title)}</h2>
+    <ul class="tiles">
+${list.map((card) => renderCard(card, group)).join('\n')}
+    </ul>`
+    })
+    .filter(Boolean)
+    .join('\n\n')
+}
+
+/** home/index.html の目印を、生成したカードに差し替える。 */
+async function buildHome() {
+  const template = await readFile(resolve(root, 'home/index.html'), 'utf8')
+  const marker = '<!--{{cards}}-->'
+  if (!template.includes(marker)) {
+    throw new Error(`home/index.html に ${marker} が見つかりません`)
+  }
+  await cp(resolve(root, 'home'), site, { recursive: true })
+  await writeFile(resolve(site, 'index.html'), template.replace(marker, renderCards().trimStart()))
+}
+
+// ---------------------------------------------------------------------------
+// firebase.json の rewrites
+// ---------------------------------------------------------------------------
+
+/**
+ * SPA は「どのパスで来ても入口の HTML を返す」必要がある。
+ * カードが独自の URL を持つ場合（/steptest/ など）は、アプリ本体より先に置く。
+ */
+function expectedRewrites() {
+  const rewrites = []
+  for (const card of cards.filter((c) => c.rewriteTo)) {
+    const path = cardUrl(card).replace(/\/$/, '')
+    rewrites.push({ source: path, destination: card.rewriteTo })
+    rewrites.push({ source: `${path}/**`, destination: card.rewriteTo })
+  }
+  for (const app of apps) {
+    if (app.spa === false) continue
+    rewrites.push({ source: `/${app.id}/**`, destination: `/${app.id}/${app.entry ?? 'index.html'}` })
+  }
+  rewrites.push({ source: '**', destination: '/index.html' })
+  return rewrites
+}
+
+async function syncFirebaseConfig() {
+  const path = resolve(root, 'firebase.json')
+  const config = JSON.parse(await readFile(path, 'utf8'))
+  const expected = expectedRewrites()
+  if (JSON.stringify(config.hosting.rewrites) === JSON.stringify(expected)) return
+
+  if (!writeConfig) {
+    console.error('\n✖ firebase.json の rewrites が kinetone.json と食い違っています。')
+    console.error('  node scripts/build-site.mjs --write-config で直してからコミットしてください。')
+    console.error(`\n  期待する内容:\n${JSON.stringify(expected, null, 2)}\n`)
+    process.exit(1)
+  }
+  config.hosting.rewrites = expected
+  await writeFile(path, `${JSON.stringify(config, null, 2)}\n`)
+  console.log('▶ firebase.json の rewrites を更新しました（コミットしてください）')
+}
+
+// ---------------------------------------------------------------------------
+// アプリのビルド・コピー
+// ---------------------------------------------------------------------------
+
+async function buildApp(app) {
+  const { build } = app
+  const from = resolve(root, build.dir)
+  const to = resolve(site, app.id)
+
+  if (build.kind === 'vite') {
+    const path = `/${app.id}/`
+    console.log(`\n▶ ${build.dir} を ${path} 向けにビルド`)
+    // 追跡していないモデル・WASM は、無ければ取得スクリプトで用意する
+    if (build.setup && build.needs && !(await exists(resolve(from, build.needs)))) {
+      run('npm', ['run', build.setup], from)
+    }
+    run('npx', ['tsc', '-b'], from)
+    run('npx', ['vite', 'build'], from, { KINETONE_BASE: path })
+    // ビルド後の生成物（Service Worker など）はアプリ側のスクリプトに任せる
+    for (const script of build.post ?? []) {
+      run('node', [script], from, { KINETONE_BASE: path })
+    }
+    await cp(resolve(from, 'dist'), to, { recursive: true })
+    return
+  }
+
+  if (build.kind === 'static') {
+    console.log(`\n▶ ${build.dir} をコピー`)
+    if (build.files) {
+      await mkdir(to, { recursive: true })
+      for (const file of build.files) {
+        await cp(resolve(from, file), resolve(to, file), { recursive: true })
+      }
+    } else {
+      await cp(from, to, { recursive: true })
+    }
+    return
+  }
+
+  // 別リポジトリへ出したゲームは、ビルド済みの成果物を取ってくる形にする予定
+  throw new Error(`${app.id}: 未対応の build.kind です（${build.kind}）`)
+}
+
+// ---------------------------------------------------------------------------
+
+await syncFirebaseConfig()
+
 await rm(site, { recursive: true, force: true })
 await mkdir(site, { recursive: true })
 
-for (const app of VITE_APPS) {
-  const cwd = resolve(root, app.dir)
-  console.log(`\n▶ ${app.dir} を ${app.path} 向けにビルド`)
-  // 追跡していないモデル・WASM は、無ければ取得スクリプトで用意する
-  if (app.setup && !(await exists(resolve(cwd, app.needs)))) {
-    run('npm', ['run', app.setup], cwd)
-  }
-  run('npx', ['tsc', '-b'], cwd)
-  run('npx', ['vite', 'build'], cwd, { KINETONE_BASE: app.path })
-  // ビルド後の生成物（Service Worker など）はアプリ側のスクリプトに任せる
-  for (const script of app.post ?? []) {
-    run('node', [script], cwd, { KINETONE_BASE: app.path })
-  }
-  await cp(resolve(cwd, 'dist'), resolve(site, app.out ?? app.dir), { recursive: true })
+for (const app of apps) {
+  await buildApp(app)
 }
 
-for (const app of STATIC_APPS) {
-  const from = resolve(root, app.dir)
-  const to = resolve(site, app.out)
-  console.log(`\n▶ ${app.dir} をコピー`)
-  if (app.out === 'hanabi') {
-    await mkdir(to, { recursive: true })
-    for (const f of HANABI_FILES) {
-      await cp(resolve(from, f), resolve(to, f), { recursive: true })
-    }
-  } else {
-    await cp(from, to, { recursive: true })
-  }
+console.log('\n▶ ホーム画面を組み立て')
+await buildHome()
+
+for (const [id] of skipped) {
+  console.log(`  － ${id} は enabled: false のため載せていません`)
+}
+for (const card of hiddenCards) {
+  console.log(`  － カード「${card.name}」は ${card.app} が載っていないため出していません`)
 }
 
-console.log('\n▶ ホーム画面をコピー')
-await cp(resolve(root, 'home'), site, { recursive: true })
-
-console.log('\n✓ site/ を作成しました（npx firebase-tools deploy --only hosting で配信）')
+console.log(
+  `\n✓ site/ を作成しました（アプリ ${apps.length} 個 / カード ${cards.length} 枚）` +
+    '\n  npx firebase-tools deploy --only hosting で配信',
+)
