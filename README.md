@@ -68,7 +68,7 @@ npx firebase-tools deploy --only hosting   # 取得 → site/ を組み立て �
 
 **[`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) を複製してください。**
 下の「約束ごと」を満たした状態から始められます（カメラの選択・配信パスの設定・
-リリースのワークフロー・画面づくりの作法まで入っています）。
+リリースのワークフロー・画面づくりの作法まで入っています）。**public なので誰でも読めます。**
 
 ```bash
 gh repo create researchcoordinate/<name> --private --template researchcoordinate/kinetone-template
@@ -76,6 +76,20 @@ gh repo create researchcoordinate/<name> --private --template researchcoordinate
 
 複製したら、まず配信パス（`/example/` になっている箇所）を書き換えます。
 詳しい手順はテンプレートの README にあります。
+
+#### AI に作らせるとき
+
+次の 2 つを読ませてから頼むと、統合できる形のものが出てきます。どちらも public です。
+
+- このファイル（`https://github.com/researchcoordinate/kinetone/blob/main/README.md`）
+- ひな形（`https://github.com/researchcoordinate/kinetone-template`）
+
+> kinetone の README とひな形（kinetone-template）を読んで、
+> 「〇〇するゲーム」を作ってください。配信パスは `/〇〇/` です。
+
+**GitHub の操作に慣れていない人は、ゲームを作るところまでを担当し、リポジトリ作成・
+タグ付け・`kinetone.json` への登録・デプロイは慣れた人が引き取る**のが確実です。
+手続きの部分がいちばん GitHub 慣れを要求します。
 
 ### 1. ゲーム側が満たすこと（統合の約束ごと）
 
@@ -92,6 +106,31 @@ gh repo create researchcoordinate/<name> --private --template researchcoordinate
 [chair-stand](https://github.com/researchcoordinate/chair-stand/blob/main/.github/workflows/release.yml)（Vite）か
 [hanabi](https://github.com/researchcoordinate/hanabi/blob/main/.github/workflows/release.yml)（静的サイト）の
 ワークフローを写してください。
+
+Vite の場合、`KINETONE_BASE` の受け方はこうします。**base は Vite のアセット URL だけでなく、
+Service Worker の scope と start_url も決めます。**ここが配信パスと食い違うと、本番で画面が
+真っ白になったり、別のゲームのキャッシュを掴んだりします。
+
+```ts
+// vite.config.ts
+const base = process.env.KINETONE_BASE ?? '/'   // 単体で動かすときは '/'
+
+export default defineConfig({
+  base,
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',   // 施設では開きっぱなしなので自動で入れ替える
+      base,
+      scope: base,
+      manifest: { start_url: base, scope: base /* ... */ },
+    }),
+  ],
+})
+```
+
+成果物は `dist/` の**中身**を固めます（`cd dist && zip -qr ../dist.zip .`）。
+`dist/` という階層を含めると、展開先が `site/<id>/dist/...` になって配信されません。
 
 ### 2. サムネイルを用意する
 
