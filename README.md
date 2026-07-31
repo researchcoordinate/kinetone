@@ -1,170 +1,269 @@
-# kinetone
+# kinetone — 統合サイト
 
-介護施設・サ高住向けの運動アプリ群です。Web カメラ 1 台とブラウザだけで動き、
-**カメラ映像はすべて端末内で処理し、外部に送信も保存もしません**（バックエンド無し）。
+介護施設・サ高住向けの運動アプリ群 **kinetone** のホーム画面と、
+「どのゲームをどのバージョンで載せるか」の一覧を持つリポジトリです。
 
-共通のホーム画面から各ゲームへ遷移する構成です。ゲームは開発者ごとに独立したリポジトリへ
-移していく途中で、このリポジトリは**ホームと、まだ移していないゲーム**を持ちます。
-何を配信するかは `kinetone.json` が決めます。
+**https://kinetone.web.app/** — Firebase プロジェクト `kinetone`
 
-## 配信構成（統合サイト）
+**ゲームのソースはここにはありません。**各ゲームは独立したリポジトリで開発し、
+そこで作られた**ビルド済みの成果物（GitHub Release の zip）を取り込んで**配信します。
+このリポジトリがゲームをビルドすることはありません。
+
+```
+ゲームのリポジトリ            このリポジトリ                Firebase Hosting
+─────────────────           ──────────────                ────────────────
+コードを直す
+  ↓
+git tag v0.2.0 && push
+  ↓
+CI が型チェック・テスト・
+ビルドをして Release を作る ──→ kinetone.json の tag を
+                                v0.2.0 に上げる
+                                  ↓
+                                deploy ──────────────────→ 本番に反映
+```
+
+この形にしている理由は 3 つあります。
+
+- **他人の作業中のコードが本番に混ざらない。** 固定したタグの成果物しか取り込みません。
+- **複数人が同時に開発してもコミットが衝突しない。** 別々のリポジトリで作業します。
+- **壊れたものが本番に出ない。** 各ゲームの CI が型チェックとテストを通さないと Release が作られません。
 
 利用者の名簿と記録をアプリ間で共有するため、**すべてを 1 つの origin にまとめて**配信します
-（ブラウザの localStorage はサイトごとに分かれるため、別 URL では名簿を共有できません）。
+（ブラウザの localStorage はサイトごとに分かれるので、別 URL では共有できません）。
+カメラの選択もこの仕組みで全アプリ共通になっています。
 
-**https://kinetone.web.app/** — Firebase プロジェクト `kinetone`（このプロジェクトの Hosting サイトはこれ 1 つ）
+---
 
-### 何を載せるかは `kinetone.json` だけが決める
+## 前提
 
-ホームのカード・`site/` の組み立て・`firebase.json` の rewrites は、すべて
-リポジトリ直下の **`kinetone.json`** から生成します。ビルドスクリプトにアプリ名は書きません。
+| 必要なもの | 用途 | 確認 |
+|---|---|---|
+| Node.js 20 以上 | ビルドスクリプト | `node -v` |
+| [`gh` CLI](https://cli.github.com/)（ログイン済み） | private リポジトリの Release を取得する | `gh auth status` |
+| Firebase CLI（ログイン済み） | 配信 | `npx firebase-tools login` |
+
+`gh` の認証をそのまま使うので、**開発者ごとのトークン設定は要りません。**
+
+---
+
+## ゲームの新しい版を本番に出す（いちばんよく使う操作）
+
+1. ゲーム側のリポジトリでタグを打つ（`git tag v0.2.0 && git push origin v0.2.0`）
+2. CI が通って Release ができたことを確認する（`gh release view v0.2.0 --repo researchcoordinate/<repo>`）
+3. このリポジトリで `kinetone.json` の該当 `tag` を書き換えてデプロイする
+
+```bash
+npx firebase-tools deploy --only hosting   # 取得 → site/ を組み立て → 配信
+```
+
+**戻したいときは `tag` を前のバージョンに戻して、もう一度デプロイするだけです。**
+ゲーム側でタグを打っただけでは本番は変わりません。
+
+---
+
+## ゲームを新しく追加する
+
+### 1. ゲーム側が満たすこと（統合の約束ごと）
+
+| 項目 | 内容 |
+|---|---|
+| **配信パス** | `/<id>/` で配信します。`id` は `kinetone.json` に書くもので、リポジトリ名と揃えると分かりやすい |
+| **ビルド時の base** | Vite なら `KINETONE_BASE=/<id>/` を渡してビルドする。**Service Worker の scope もこれで決まる**ので、成果物は配信パスに固定される |
+| **成果物の形** | 配信するファイルの**中身**を固めた zip（展開して `site/<id>/` にそのまま置く。`dist/` という階層は作らない） |
+| **入口** | 既定は `index.html`。別名なら `kinetone.json` の `entry` に書く |
+| **外部依存** | **実行時に外部の CDN やモデル配信元へ取りに行かないこと**（後述の「方針」参照） |
+| **CI** | タグ push で型チェック・テスト・ビルドをして Release に zip を添付する |
+
+既存のゲームのワークフローをそのまま写すのが早いです
+（[chair-stand](https://github.com/researchcoordinate/chair-stand/blob/main/.github/workflows/release.yml) が Vite の例、
+[hanabi](https://github.com/researchcoordinate/hanabi/blob/main/.github/workflows/release.yml) が静的サイトの例）。
+
+### 2. サムネイルを用意する
+
+`home/thumbs/<name>.jpg` に置きます。
+
+- **480 × 270（16:9）の JPEG**
+- ゲームの開始画面か、遊んでいる場面を実際に撮ったもの（見て中身が分かるように）
+
+撮り方の例（ローカルサーバーで開いて撮影 → 縮小）:
+
+```bash
+python3 -m http.server 8080 --directory site
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+  --screenshot=/tmp/shot.png --window-size=1024,576 http://localhost:8080/<id>/
+sips -s format jpeg -s formatOptions 80 -z 270 480 /tmp/shot.png --out home/thumbs/<name>.jpg
+```
+
+### 3. `kinetone.json` に 2 か所足す
+
+```jsonc
+"apps": {
+  "<id>": {
+    "build": { "kind": "github-release", "repo": "researchcoordinate/<repo>",
+               "tag": "v0.1.0", "asset": "dist.zip" },
+    "spa": true                      // SPA なら true（どのパスで来ても入口を返す）
+  }
+},
+"cards": [
+  { "group": "play",                 // play=あそぶ / measure=はかる
+    "app": "<id>",
+    "name": "ゲームの名前",
+    "desc": "ホームに出す一行説明",
+    "tag": "全身を動かす",             // 何を動かすか・何をはかるか
+    "people": "group",               // group=みんなで / solo=ひとりで（測定は省略）
+    "thumb": "<name>.jpg" }
+]
+```
+
+### 4. 反映して配信する
+
+```bash
+node scripts/build-site.mjs --write-config   # firebase.json の rewrites を更新（要コミット）
+npx firebase-tools deploy --only hosting
+```
+
+---
+
+## `kinetone.json` の読み方
+
+**このファイルだけが配信内容を決めます。**ビルドスクリプトにアプリ名は書きません。
 
 | やりたいこと | 直す場所 |
 |---|---|
-| ゲームを追加する | `kinetone.json` の `apps` に 1 つ、`cards` に 1 つ、`home/thumbs/` にサムネイル 1 枚 |
+| ゲームのバージョンを上げる／戻す | その `apps` の `tag` |
 | ホームの並び順を変える | `cards` 配列の順番（そのまま画面の順番） |
 | 名前・説明・タグを直す | 該当する `cards` の項目 |
 | 開発中のゲームを配信から外す | その `apps` に `"enabled": false`（いまは `block` がこれ） |
+| 1 つの成果物を 2 つの入口で使う | 2 つ目の `apps` に同じ `build` と、違う `entry` |
 
 `apps.<id>.build.kind` が「どこから持ってくるか」です。
 
 | `kind` | 意味 |
 |---|---|
-| `vite` | このリポジトリの Vite プロジェクトをビルドする |
-| `static` | このリポジトリの静的ファイルをコピーする |
-| `github-release` | **別リポジトリの Release からビルド済みの zip を取り込む** |
+| `github-release` | **別リポジトリの Release から zip を取り込む**（通常はこれ） |
+| `vite` | このリポジトリ内の Vite プロジェクトをビルドする（いまは未使用） |
+| `static` | このリポジトリ内の静的ファイルをコピーする（いまは未使用） |
 
-`github-release` は `tag` でバージョンを固定するので、**他の開発者の作業中コードが
-本番に混ざりません**。取得は `gh` CLI に任せているため、private リポジトリでも
-開発者ごとのトークン設定は不要です（既存の GitHub 認証をそのまま使います）。
-zip は `.cache/artifacts/` にキャッシュします。
+`vite` / `static` は、切り出す前のゲームを一時的に手元で試すための逃げ道として残してあります。
 
-```jsonc
-"hanabi": {
-  "build": { "kind": "github-release", "repo": "researchcoordinate/hanabi",
-             "tag": "v0.1.0", "asset": "dist.zip" },
-  "entry": "hanabi_game.html"
-}
+`shared` は、ホームが直接読む共通モジュールの取り込み先とタグです。
+
+---
+
+## 仕組み
+
+`scripts/build-site.mjs` が `kinetone.json` を読んで `site/` を組み立てます。
+デプロイの predeploy で自動的に走ります。
+
+```
+site/
+  index.html          ホーム（home/index.html にカードを流し込んだもの）
+  thumbs/             サムネイル
+  shared/camera/      共通モジュール（ホームが <script type="module"> で読む）
+  <id>/               各ゲーム（Release の zip を展開したもの）
 ```
 
-ゲーム側でタグを打っただけでは本番は変わりません。**ここの `tag` を上げてデプロイした
-時点で反映**され、戻したいときは前の `tag` に戻すだけです。
+覚えておくと役に立つ点が 4 つあります。
 
-`entry` を指定すると、その HTML が配信ディレクトリの `index.html` になります。
-Firebase Hosting は `/xxx/` の要求に静的な `index.html` を先に返すため、rewrites だけでは
-入口を差し替えられません（あいうべ体操は 1 つの zip を 2 つの入口で使っています）。
-**ゲームは 1 つずつ、好きな順番で外部リポジトリへ移せます。**
+**取得したものはキャッシュされます**（`.cache/`）。同じタグなら再ダウンロードしません。
 
-```bash
-node scripts/build-site.mjs                # site/ を作る（各アプリをサブパス向けにビルド）
-node scripts/build-site.mjs --write-config # kinetone.json に合わせて firebase.json を更新
-npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeploy で上のビルドが走る）
-```
+**`firebase.json` の rewrites も `kinetone.json` から決まります。**ただし Firebase CLI は
+デプロイ開始時に `firebase.json` を読むため、predeploy で書き換えてもその回には効きません。
+そのため既定では**食い違いを検出してデプロイを止める**だけにし、書き換えは
+`--write-config` を付けたときだけ行います（更新したらコミットしてください）。
 
-`firebase.json` は Firebase CLI がデプロイ開始時に読むため、predeploy の中で書き換えても
-その回には反映されません。そのため既定では**食い違いを検出してデプロイを止める**だけにし、
-書き換えは `--write-config` を付けたときだけ行います（更新したらコミットしてください）。
+**入口は必ず `index.html` として置かれます。** Firebase Hosting は `/xxx/` の要求に対して
+静的な `index.html` を rewrites より先に返すので、rewrites だけでは入口を差し替えられません。
+`entry` を指定すると、その HTML が配信ディレクトリの `index.html` になります
+（あいうべ体操は 1 つの zip を 2 つの入口で使っています）。
 
-各アプリは**単体サイトとしても**ビルドできます（`KINETONE_BASE` 未指定なら base は `/`）。
+**ホームのカードは `home/index.html` の `<!--{{cards}}-->` に流し込まれます。**
+`home/index.html` を直接ブラウザで開くとカードは出ません。`site/index.html` を見てください。
+
+---
 
 ## 共通モジュール
 
 アプリをまたいで同じであるべきものは、別リポジトリに置いてタグで固定して取り込みます。
-アプリを 1 つずつ別リポジトリへ分けていく方針なので、隣のフォルダを参照する形
-（`file:`）にはしません。
 
 | モジュール | 中身 |
 |---|---|
 | [`@kinetone/camera`](https://github.com/researchcoordinate/kinetone-camera) | カメラの選択・保存・再接続と、歯車の設定パネル。依存なし・素の ES モジュールなので、Vite のアプリからもビルドの無い静的サイトからも使えます |
 
-Vite の各アプリは npm の依存として取り込みます。**public リポジトリなので、
-開発者ごと・CI ごとのトークン設定は要りません。**
+**public リポジトリなので、開発者ごと・CI ごとのトークン設定は要りません。**
 
 ```jsonc
+// Vite のアプリ（package.json）
 "@kinetone/camera": "github:researchcoordinate/kinetone-camera#v0.1.0"
 ```
 
-ホームはビルドが無いので、`build-site.mjs` が同じタグのソースを取得して
-`site/shared/camera/` に置き、`<script type="module">` で読みます。取り込むタグは
-`kinetone.json` の `shared` が決めます（`.cache/shared/` にキャッシュします）。
-
-あいうべ体操（別リポジトリ）は、ビルドが無く単体でも動かせるようにするため、
-`public/shared/camera/` にファイルを同梱しています（更新時は手で入れ替えます）。
+ビルドの無い静的サイト（hanabi・あいうべ体操）は、単体でも動かせるように
+`shared/camera/` へファイルを同梱しています（更新時は手で入れ替えます）。
+ホームは `build-site.mjs` が同じタグのソースを取得して `site/shared/camera/` に置きます。
 
 **カメラの選択は全アプリで共通です。**ホーム画面の右下の小さな歯車で 1 回選べば、
 どのゲームでもそのカメラで開きます（施設や展示で使うカメラは 1 台なので、アプリごとに
-選ばせる意味がありません）。
+選ばせる意味がありません）。同じ origin で配信しているから成り立っています。
+
+---
 
 ## 収録アプリ
 
-| フォルダ | 統合サイトのパス | 内容 | 姿勢推定 |
-|---|---|---|---|
-| **別リポジトリ** [`researchcoordinate/flower`](https://github.com/researchcoordinate/flower) | `/flower/` | みんなの花畑（体を動かすと足元に花が育つ演出。ペット・BGM・効果音つき） | MediaPipe（既定）/ MoveNet 切替可 |
-| **別リポジトリ** [`researchcoordinate/hanabi`](https://github.com/researchcoordinate/hanabi) | `/hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる静的サイト） | TensorFlow.js MoveNet MultiPose |
-| **別リポジトリ** [`researchcoordinate/stepping`](https://github.com/researchcoordinate/stepping) | `/stepping/` | おさんぽ足踏み（その場足踏みリハビリゲーム） | MediaPipe Tasks Vision |
-| 同上 | `/steptest/` | 2分間足踏みテストの測定アプリ（同じ成果物の `measure.html`） | MediaPipe Tasks Vision |
-| **別リポジトリ** [`researchcoordinate/chair-stand`](https://github.com/researchcoordinate/chair-stand) | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST）の測定アプリ | MediaPipe Tasks Vision |
-| **別リポジトリ** [`researchcoordinate/aiube`](https://github.com/researchcoordinate/aiube) | `/aiube-avatar/` | あいうべ体操・アバター版（静的サイト） | MediaPipe Face Landmarker |
-| 同上 | `/aiube/` | あいうべ体操・フェイスメッシュ版（同じ Release の zip・入口だけ違う） | MediaPipe Face Landmarker |
-| **別リポジトリ** [`researchcoordinate/block`](https://github.com/researchcoordinate/block) | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） | MediaPipe Tasks Vision |
+| リポジトリ | 配信パス | 内容 |
+|---|---|---|
+| [`flower`](https://github.com/researchcoordinate/flower) | `/flower/` | みんなの花畑（体を動かすと足元に花が育つ。ペット・BGM つき） |
+| [`hanabi`](https://github.com/researchcoordinate/hanabi) | `/hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる） |
+| [`stepping`](https://github.com/researchcoordinate/stepping) | `/stepping/` | おさんぽ足踏み（その場足踏みで石畳の街が進む） |
+| 同上 | `/steptest/` | 2分間足踏みテスト（同じ成果物の `measure.html`） |
+| [`chair-stand`](https://github.com/researchcoordinate/chair-stand) | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST） |
+| [`aiube`](https://github.com/researchcoordinate/aiube) | `/aiube/` | あいうべ体操・自分の顔版 |
+| 同上 | `/aiube-avatar/` | あいうべ体操・キャラクター版（同じ zip・入口だけ違う） |
+| [`block`](https://github.com/researchcoordinate/block) | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） |
 
-**ゲームはすべて別リポジトリに出しました。**このリポジトリが持つのはホーム画面と、
-何をどのバージョンで載せるかの一覧（`kinetone.json`）だけです。ゲームのソースはここには
-ありません。**このリポジトリでゲームがビルドされることもありません**（固定したタグの
-成果物を取得して並べるだけ）。壊れたものを publish しない関門は各ゲーム側の CI です。
+各ゲームの仕様・設計は、それぞれのリポジトリの README を参照してください。
 
-ゲームを直すときは、そのゲームのリポジトリで作業してタグを打ち、ここの `tag` を上げます。
-**別々のリポジトリで作業するので、複数人が同時に開発してもコミットが混ざりません。**
+---
 
-### 旧配信先（1 ゲーム 1 プロジェクト時代の名残り）
+## 旧配信先（1 ゲーム 1 プロジェクト時代の名残り）
 
 統合サイトへ移す前は、ゲームごとに Firebase プロジェクトと URL を持っていました。
 これらのサイトは**削除せず、統合サイトへの案内ページに差し替えてあります**
 （`scripts/legacy-redirect.mjs`）。旧 URL をブックマークしている端末が、古いビルドを
 使い続けてしまうのを防ぐためです。
 
-| 旧 URL | 送り先 | Firebase プロジェクト |
-|---|---|---|
-| kinetone-multi-flower.web.app | `/flower/` | `kinetone-multi-flower` |
-| kinetone-hanabi.web.app | `/hanabi/` | `kinetone-hanabi` |
-| kinetone-stepping.web.app | `/stepping/` | `kinetone-stepping` |
-| kinetone-steptest.web.app | `/steptest/` | `kinetone-stepping` |
-| kinetone-chairstand.web.app | `/chair-stand/` | `kinetone-chairstand` |
-| aiube-taisou-demo.web.app | `/aiube-avatar/` | `aiube-taisou-demo` |
-| aiube-mesh-demo.web.app | `/aiube/` | `aiube-taisou-demo` |
+| 旧 URL | 送り先 |
+|---|---|
+| kinetone-multi-flower.web.app | `/flower/` |
+| kinetone-hanabi.web.app | `/hanabi/` |
+| kinetone-stepping.web.app | `/stepping/` |
+| kinetone-steptest.web.app | `/steptest/` |
+| kinetone-chairstand.web.app | `/chair-stand/` |
+| aiube-taisou-demo.web.app | `/aiube-avatar/` |
+| aiube-mesh-demo.web.app | `/aiube/` |
 
-> **注意**: このリポジトリに残る各アプリのフォルダには当時の `firebase.json` があります。
-> フォルダの中で `npx firebase-tools deploy` を実行すると、この案内ページを**古いアプリで
-> 上書きしてしまいます**。配信は必ずリポジトリ直下から行ってください。上書きしてしまった
-> 場合は `node scripts/legacy-redirect.mjs` で戻せます。
+案内ページには、旧 PWA の Service Worker を解除する `sw.js` も置いています
+（放っておくとキャッシュから古い画面が出続けて、案内ページに辿り着けないため）。
+送り先を変えるときは `scripts/legacy-redirect.mjs` を書き換えて再実行します。
 
-みんなの花畑は、カメラ至近の一人が主なので既定エンジンは MediaPipe。
-展示会の多人数用途は `?engine=movenet`。
+---
 
-**デプロイはリポジトリ直下から**行います（各アプリのフォルダからではありません）。
+## 方針
+
+- **実行時に外部の CDN やモデル配信元へ取りに行かない。** hanabi は以前 jsDelivr と
+  tfhub.dev から実行時に読み込んでいましたが、tfhub.dev が廃止されて kaggle.com へ
+  リダイレクトされるようになり、**社内ネットワークのフィルタで止められた端末が起動
+  できなくなりました**。開発機ではブラウザキャッシュに残っていて気づけません
+  （「自分の PC では動くのに他の PC では起動しない」という形で現れます）。
+  ライブラリもモデルも**必ず同梱**し、CI で機械的に確認してください。
+- **モデル・WASM は原則追跡しない。**取得スクリプトで再取得できるようにします。
+  ただしビルドの無い静的サイト（hanabi・あいうべ体操）は、clone してそのまま動く状態を
+  保つため追跡しています。
+- **大きな素材は「使うものだけ」追跡する。** 未使用の音声・動画・BGM は `.gitignore` で
+  除外し、差し替えるときにその 1 つだけ `git add` します。
+- **ビルド成果物（`dist/`）は追跡しない。**
+- **カメラは HTTPS か localhost でしか使えません。**実機での確認は、プレビューチャンネルで行います。
 
 ```bash
-npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeploy で全アプリをビルド）
+npx firebase-tools hosting:channel:deploy preview --expires 7d
 ```
-
-デプロイでは、`kinetone.json` に書かれたタグの成果物を取得して `site/` に並べ、それを配信します。
-**ソースからビルドしないので、誰かの作業中のコードが混ざることはありません。**
-本番に出すものを変えるのは `tag` の書き換えだけで、戻すのも同じです。
-
-詳しい仕様・設計は各フォルダの README を参照してください。
-
-## リポジトリの方針
-
-- **大きな素材は「使うものだけ」追跡する。** 音声・動画・BGM はリポジトリを重くするため、
-  未使用の素材は `.gitignore` で除外しています（例: `stepping/assets/BGM/`）。
-  曲を差し替えるときは、その曲だけ明示的に `git add` してください。
-- **モデル・WASM は原則追跡しない。** `npm run setup:mediapipe` などのスクリプトで再取得できます。
-  ただし例外が 2 つあります。
-  - **multi-flower** は現状オフライン優先でモデル・WASM も追跡しています（数十MB）。
-  - **hanabi**（別リポジトリ）はビルドの無い静的サイトで、clone してそのまま動く状態を
-    保ちたいため、TensorFlow.js とモデルを追跡しています（約 10MB）。
-- **実行時に外部のCDNやモデル配信元へ取りに行かない。** hanabi は以前 jsDelivr と tfhub.dev から
-  実行時に読み込んでいましたが、tfhub.dev が廃止されて kaggle.com へリダイレクトされるように
-  なり、社内ネットワークのフィルタで止められると起動できませんでした。開発機ではブラウザ
-  キャッシュに残っていて気づけないため、**必ず同梱**してください。
-- **ビルド成果物（`dist/`）は追跡しない。** 配信は各アプリの predeploy でビルドしてから行います。
