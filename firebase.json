@@ -40,10 +40,6 @@
         "destination": "/aiube/index.html"
       },
       {
-        "source": "/aiube-avatar/**",
-        "destination": "/aiube-avatar/avatar.html"
-      },
-      {
         "source": "**",
         "destination": "/index.html"
       }

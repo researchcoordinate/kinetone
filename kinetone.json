@@ -89,15 +89,20 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-aiube",
-        "tag": "v0.2.0",
+        "tag": "v0.3.0",
         "asset": "dist.zip"
       }
     },
     "aiube-avatar": {
+      "$comment": [
+        "ホームには出さない。自分の顔版だけを案内する方針にしたため。",
+        "enabled を true に戻せば、同じ Release の avatar.html を入口として復活する。"
+      ],
+      "enabled": false,
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-aiube",
-        "tag": "v0.2.0",
+        "tag": "v0.3.0",
         "asset": "dist.zip"
       },
       "entry": "avatar.html"
