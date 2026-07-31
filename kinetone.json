@@ -41,11 +41,12 @@
       "spa": true
     },
     "chair-stand": {
+      "$comment": "別リポジトリへ切り出し済み。ビルド済みの成果物（Release の zip）を取り込む。",
       "build": {
-        "kind": "vite",
-        "dir": "chair-stand-test",
-        "setup": "setup:mediapipe",
-        "needs": "public/mediapipe"
+        "kind": "github-release",
+        "repo": "researchcoordinate/chair-stand",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
       },
       "spa": true
     },
