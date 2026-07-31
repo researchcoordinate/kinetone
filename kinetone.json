@@ -27,7 +27,7 @@
   },
 
   "groups": [
-    { "id": "play", "title": "あそぶ" },
+    { "id": "play", "title": "楽しく鍛える" },
     { "id": "measure", "title": "はかる", "tileClass": "tile--measure" }
   ],
 
@@ -61,7 +61,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-chair-stand",
-        "tag": "v0.1.0",
+        "tag": "v0.2.0",
         "asset": "dist.zip"
       },
       "spa": true
@@ -164,7 +164,7 @@
     {
       "group": "play",
       "app": "aiube",
-      "name": "あいうべ体操（自分の顔）",
+      "name": "あいうべ体操",
       "desc": "自分の顔を見ながら「あ・い・う・べ」と口を大きく動かします",
       "tag": "お口を鍛える",
       "people": "solo",
