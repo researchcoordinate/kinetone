@@ -51,7 +51,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/stepping",
-        "tag": "v0.1.0",
+        "tag": "v0.2.0",
         "asset": "dist.zip"
       },
       "spa": true
@@ -89,7 +89,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/aiube",
-        "tag": "v0.1.0",
+        "tag": "v0.2.0",
         "asset": "dist.zip"
       }
     },
@@ -97,7 +97,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/aiube",
-        "tag": "v0.1.0",
+        "tag": "v0.2.0",
         "asset": "dist.zip"
       },
       "entry": "avatar.html"
@@ -111,7 +111,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/block",
-        "tag": "v0.1.0",
+        "tag": "v0.2.0",
         "asset": "dist.zip"
       },
       "spa": true
