@@ -243,6 +243,7 @@ site/
 | モジュール | 中身 |
 |---|---|
 | [`@kinetone/camera`](https://github.com/researchcoordinate/kinetone-camera) | カメラの選択・保存・再接続と、歯車の設定パネル。依存なし・素の ES モジュールなので、Vite のアプリからもビルドの無い静的サイトからも使えます |
+| [`@kinetone/voice`](https://github.com/researchcoordinate/kinetone-voice) | 案内・ペットの音声を Google Cloud TTS で作る（ビルド時のみ）。**あそぶ = Despina / はかる = ja-JP-Neural2-B** の使い分けをここが持ちます |
 | [`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) | ゲームを新しく作るときのひな形（モジュールではありませんが、共通の作法はここに集めています） |
 
 **public リポジトリなので、開発者ごと・CI ごとのトークン設定は要りません。**
@@ -255,6 +256,10 @@ site/
 ビルドの無い静的サイト（hanabi・あいうべ体操）は、単体でも動かせるように
 `shared/camera/` へファイルを同梱しています（更新時は手で入れ替えます）。
 ホームは `build-site.mjs` が同じタグのソースを取得して `site/shared/camera/` に置きます。
+
+**音声も全アプリで共通の声を使います。**ビルド前に mp3 を作って同梱し、実行時には
+TTS を呼びません。課金先は `GOOGLE_TTS_PROJECT=kinetone` を必ず指定します
+（省くと ADC の既定に引きずられ、別製品のプロジェクトで課金されます）。
 
 **カメラの選択は全アプリで共通です。**ホーム画面の右下の小さな歯車で 1 回選べば、
 どのゲームでもそのカメラで開きます（施設や展示で使うカメラは 1 台なので、アプリごとに
