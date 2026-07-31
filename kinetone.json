@@ -36,7 +36,7 @@
       "$comment": "別リポジトリへ切り出し済み。Service Worker の生成まで向こうの npm run build に含む。",
       "build": {
         "kind": "github-release",
-        "repo": "researchcoordinate/flower",
+        "repo": "researchcoordinate/kinetone-flower",
         "tag": "v0.1.0",
         "asset": "dist.zip"
       },
@@ -50,7 +50,7 @@
       ],
       "build": {
         "kind": "github-release",
-        "repo": "researchcoordinate/stepping",
+        "repo": "researchcoordinate/kinetone-stepping",
         "tag": "v0.2.0",
         "asset": "dist.zip"
       },
@@ -60,7 +60,7 @@
       "$comment": "別リポジトリへ切り出し済み。ビルド済みの成果物（Release の zip）を取り込む。",
       "build": {
         "kind": "github-release",
-        "repo": "researchcoordinate/chair-stand",
+        "repo": "researchcoordinate/kinetone-chair-stand",
         "tag": "v0.1.0",
         "asset": "dist.zip"
       },
@@ -74,7 +74,7 @@
       ],
       "build": {
         "kind": "github-release",
-        "repo": "researchcoordinate/hanabi",
+        "repo": "researchcoordinate/kinetone-hanabi",
         "tag": "v0.1.0",
         "asset": "dist.zip"
       },
@@ -88,7 +88,7 @@
       ],
       "build": {
         "kind": "github-release",
-        "repo": "researchcoordinate/aiube",
+        "repo": "researchcoordinate/kinetone-aiube",
         "tag": "v0.2.0",
         "asset": "dist.zip"
       }
@@ -96,7 +96,7 @@
     "aiube-avatar": {
       "build": {
         "kind": "github-release",
-        "repo": "researchcoordinate/aiube",
+        "repo": "researchcoordinate/kinetone-aiube",
         "tag": "v0.2.0",
         "asset": "dist.zip"
       },
@@ -110,7 +110,7 @@
       "enabled": false,
       "build": {
         "kind": "github-release",
-        "repo": "researchcoordinate/block",
+        "repo": "researchcoordinate/kinetone-block",
         "tag": "v0.2.0",
         "asset": "dist.zip"
       },

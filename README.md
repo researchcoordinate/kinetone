@@ -103,8 +103,8 @@ gh repo create researchcoordinate/<name> --private --template researchcoordinate
 | **CI** | タグ push で型チェック・テスト・ビルドをして Release に zip を添付する |
 
 ひな形を使えばここは満たされています。既存のゲームに合わせる場合は、
-[chair-stand](https://github.com/researchcoordinate/chair-stand/blob/main/.github/workflows/release.yml)（Vite）か
-[hanabi](https://github.com/researchcoordinate/hanabi/blob/main/.github/workflows/release.yml)（静的サイト）の
+[chair-stand](https://github.com/researchcoordinate/kinetone-chair-stand/blob/main/.github/workflows/release.yml)（Vite）か
+[hanabi](https://github.com/researchcoordinate/kinetone-hanabi/blob/main/.github/workflows/release.yml)（静的サイト）の
 ワークフローを写してください。
 
 Vite の場合、`KINETONE_BASE` の受け方はこうします。**base は Vite のアセット URL だけでなく、
@@ -271,14 +271,14 @@ TTS を呼びません。課金先は `GOOGLE_TTS_PROJECT=kinetone` を必ず指
 
 | リポジトリ | 配信パス | 内容 |
 |---|---|---|
-| [`flower`](https://github.com/researchcoordinate/flower) | `/flower/` | みんなの花畑（体を動かすと足元に花が育つ。ペット・BGM つき） |
-| [`hanabi`](https://github.com/researchcoordinate/hanabi) | `/hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる） |
-| [`stepping`](https://github.com/researchcoordinate/stepping) | `/stepping/` | おさんぽ足踏み（その場足踏みで石畳の街が進む） |
+| [`flower`](https://github.com/researchcoordinate/kinetone-flower) | `/flower/` | みんなの花畑（体を動かすと足元に花が育つ。ペット・BGM つき） |
+| [`hanabi`](https://github.com/researchcoordinate/kinetone-hanabi) | `/hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる） |
+| [`stepping`](https://github.com/researchcoordinate/kinetone-stepping) | `/stepping/` | おさんぽ足踏み（その場足踏みで石畳の街が進む） |
 | 同上 | `/steptest/` | 2分間足踏みテスト（同じ成果物の `measure.html`） |
-| [`chair-stand`](https://github.com/researchcoordinate/chair-stand) | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST） |
-| [`aiube`](https://github.com/researchcoordinate/aiube) | `/aiube/` | あいうべ体操・自分の顔版 |
+| [`chair-stand`](https://github.com/researchcoordinate/kinetone-chair-stand) | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST） |
+| [`aiube`](https://github.com/researchcoordinate/kinetone-aiube) | `/aiube/` | あいうべ体操・自分の顔版 |
 | 同上 | `/aiube-avatar/` | あいうべ体操・キャラクター版（同じ zip・入口だけ違う） |
-| [`block`](https://github.com/researchcoordinate/block) | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） |
+| [`block`](https://github.com/researchcoordinate/kinetone-block) | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） |
 
 新しく作るときの出発点は [`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) です。
 
