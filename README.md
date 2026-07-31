@@ -70,8 +70,10 @@ npx firebase-tools deploy --only hosting   # 取得 → site/ を組み立て �
 下の「約束ごと」を満たした状態から始められます（カメラの選択・配信パスの設定・
 リリースのワークフロー・画面づくりの作法まで入っています）。**public なので誰でも読めます。**
 
+**リポジトリ名は `kinetone-` で始めてください**（下の「リポジトリの名前と表示」を参照）。
+
 ```bash
-gh repo create researchcoordinate/<name> --private --template researchcoordinate/kinetone-template
+gh repo create researchcoordinate/kinetone-<id> --private --template researchcoordinate/kinetone-template
 ```
 
 複製したら、まず配信パス（`/example/` になっている箇所）を書き換えます。
@@ -95,7 +97,8 @@ gh repo create researchcoordinate/<name> --private --template researchcoordinate
 
 | 項目 | 内容 |
 |---|---|
-| **配信パス** | `/<id>/` で配信します。`id` は `kinetone.json` に書くもので、リポジトリ名と揃えると分かりやすい |
+| **リポジトリ名** | `kinetone-<id>`（例: `kinetone-flower`）。下の「リポジトリの名前と表示」を参照 |
+| **配信パス** | `/<id>/` で配信します。`id` は `kinetone.json` に書くキーで、リポジトリ名から `kinetone-` を除いたもの |
 | **ビルド時の base** | Vite なら `KINETONE_BASE=/<id>/` を渡してビルドする。**Service Worker の scope もこれで決まる**ので、成果物は配信パスに固定される |
 | **成果物の形** | 配信するファイルの**中身**を固めた zip（展開して `site/<id>/` にそのまま置く。`dist/` という階層は作らない） |
 | **入口** | 既定は `index.html`。別名なら `kinetone.json` の `entry` に書く |
@@ -177,6 +180,38 @@ npx firebase-tools deploy --only hosting
 ```
 
 ---
+
+## リポジトリの名前と表示
+
+**kinetone のリポジトリは、すべて `kinetone-` で始めます。**会社の GitHub には
+みまもりや別プロジェクトのリポジトリも並ぶため、一覧で見分けられるようにするためです。
+以前は `flower` `hanabi` のようなゲーム名だけでしたが、数が増えて紛らわしくなったので
+揃えました。
+
+新しく作るときは 3 つとも設定してください。
+
+| 項目 | 決めごと | 例 |
+|---|---|---|
+| リポジトリ名 | `kinetone-<id>` | `kinetone-flower` |
+| 説明 | **`【kinetone】`** で始める | `【kinetone】みんなの花畑 — カメラの前で体を動かすと足元に花が育つ体感ゲーム` |
+| トピック | `kinetone` を付ける | GitHub 上で絞り込めます |
+
+```bash
+gh repo create researchcoordinate/kinetone-<id> --private \
+  --description "【kinetone】<ゲーム名> — <一行説明>" \
+  --template researchcoordinate/kinetone-template
+gh api -X PUT repos/researchcoordinate/kinetone-<id>/topics \
+  --input - <<< '{"names":["kinetone"]}'
+```
+
+**配信パスとホームのカードでは `kinetone-` を付けません。** `kinetone.json` のキー（`id`）と
+URL は `flower` のように短いままです。長い URL を利用者に見せないためです。
+
+| | 名前 |
+|---|---|
+| リポジトリ | `researchcoordinate/kinetone-flower` |
+| `kinetone.json` のキー | `flower` |
+| 配信 URL | `https://kinetone.web.app/flower/` |
 
 ## `kinetone.json` の読み方
 
