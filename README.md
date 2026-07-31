@@ -49,6 +49,10 @@ zip は `.cache/artifacts/` にキャッシュします。
 
 ゲーム側でタグを打っただけでは本番は変わりません。**ここの `tag` を上げてデプロイした
 時点で反映**され、戻したいときは前の `tag` に戻すだけです。
+
+`entry` を指定すると、その HTML が配信ディレクトリの `index.html` になります。
+Firebase Hosting は `/xxx/` の要求に静的な `index.html` を先に返すため、rewrites だけでは
+入口を差し替えられません（あいうべ体操は 1 つの zip を 2 つの入口で使っています）。
 **ゲームは 1 つずつ、好きな順番で外部リポジトリへ移せます。**
 
 ```bash
@@ -84,7 +88,7 @@ Vite の各アプリは npm の依存として取り込みます。**public リ�
 `site/shared/camera/` に置き、`<script type="module">` で読みます。取り込むタグは
 `kinetone.json` の `shared` が決めます（`.cache/shared/` にキャッシュします）。
 
-あいうべ体操の 2 つは、ビルドが無く単体でも動かせるようにするため、
+あいうべ体操（別リポジトリ）は、ビルドが無く単体でも動かせるようにするため、
 `public/shared/camera/` にファイルを同梱しています（更新時は手で入れ替えます）。
 
 **カメラの選択は全アプリで共通です。**ホーム画面の右下の小さな歯車で 1 回選べば、
@@ -100,8 +104,8 @@ Vite の各アプリは npm の依存として取り込みます。**public リ�
 | `stepping/` | `/stepping/` | おさんぽ足踏み（その場足踏みリハビリゲーム） | MediaPipe Tasks Vision |
 | `stepping/` | `/steptest/` | 2分間足踏みテストの測定アプリ（同じソースの `measure.html`） | MediaPipe Tasks Vision |
 | `chair-stand-test/` | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST）の測定アプリ | MediaPipe Tasks Vision |
-| `aiube-exercise-avatar/` | `/aiube-avatar/` | あいうべ体操・アバター版（静的サイト） | MediaPipe Face Landmarker |
-| `aiube-exercise/` | `/aiube/` | あいうべ体操・フェイスメッシュ版（静的サイト） | MediaPipe Face Landmarker |
+| **別リポジトリ** [`researchcoordinate/aiube`](https://github.com/researchcoordinate/aiube) | `/aiube-avatar/` | あいうべ体操・アバター版（静的サイト） | MediaPipe Face Landmarker |
+| 同上 | `/aiube/` | あいうべ体操・フェイスメッシュ版（同じ Release の zip・入口だけ違う） | MediaPipe Face Landmarker |
 | `block/` | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） | MediaPipe Tasks Vision |
 
 各アプリは独立しています（`stepping/` `chair-stand-test/` `multi-flower/` `block/` は Vite
@@ -129,9 +133,6 @@ Vite の各アプリは npm の依存として取り込みます。**public リ�
 > フォルダの中で `npx firebase-tools deploy` を実行すると、この案内ページを**古いアプリで
 > 上書きしてしまいます**。配信は必ずリポジトリ直下から行ってください。上書きしてしまった
 > 場合は `node scripts/legacy-redirect.mjs` で戻せます。
-
-あいうべ体操のメッシュ版とアバター版の差分は `public/index.html` だけなので、
-判定ロジックを直すときは両方に反映してください。
 
 みんなの花畑は、カメラ至近の一人が主なので既定エンジンは MediaPipe。
 展示会の多人数用途は `?engine=movenet`。

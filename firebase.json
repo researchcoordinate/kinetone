@@ -2,33 +2,81 @@
   "hosting": {
     "site": "kinetone",
     "public": "site",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "predeploy": ["node scripts/build-site.mjs"],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "predeploy": [
+      "node scripts/build-site.mjs"
+    ],
     "rewrites": [
-      { "source": "/steptest", "destination": "/stepping/measure.html" },
-      { "source": "/steptest/**", "destination": "/stepping/measure.html" },
-      { "source": "/flower/**", "destination": "/flower/index.html" },
-      { "source": "/stepping/**", "destination": "/stepping/index.html" },
-      { "source": "/chair-stand/**", "destination": "/chair-stand/index.html" },
-      { "source": "/hanabi/**", "destination": "/hanabi/hanabi_game.html" },
-      { "source": "/aiube/**", "destination": "/aiube/index.html" },
-      { "source": "/aiube-avatar/**", "destination": "/aiube-avatar/index.html" },
-      { "source": "**", "destination": "/index.html" }
+      {
+        "source": "/steptest",
+        "destination": "/stepping/measure.html"
+      },
+      {
+        "source": "/steptest/**",
+        "destination": "/stepping/measure.html"
+      },
+      {
+        "source": "/flower/**",
+        "destination": "/flower/index.html"
+      },
+      {
+        "source": "/stepping/**",
+        "destination": "/stepping/index.html"
+      },
+      {
+        "source": "/chair-stand/**",
+        "destination": "/chair-stand/index.html"
+      },
+      {
+        "source": "/hanabi/**",
+        "destination": "/hanabi/hanabi_game.html"
+      },
+      {
+        "source": "/aiube/**",
+        "destination": "/aiube/index.html"
+      },
+      {
+        "source": "/aiube-avatar/**",
+        "destination": "/aiube-avatar/avatar.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ],
     "headers": [
       {
         "comment": "HTML と各アプリの入口は毎回取り直す（更新がすぐ届くように）",
         "source": "**",
-        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       },
       {
         "comment": "ファイル名にハッシュが付くビルド成果物とモデルは長期キャッシュ",
         "source": "**/assets/**",
-        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
       },
       {
         "source": "**/*.@(wasm|task|mp4|data)",
-        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
       }
     ]
   }

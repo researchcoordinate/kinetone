@@ -64,10 +64,26 @@
       "entry": "hanabi_game.html"
     },
     "aiube": {
-      "build": { "kind": "static", "dir": "aiube-exercise/public" }
+      "$comment": [
+        "別リポジトリへ切り出し済み。メッシュ版とアバター版は HTML 1 枚しか違わず、",
+        "MediaPipe の WASM とモデル（22MB）を共有しているので、同じ Release の zip を",
+        "2 つの入口で使う（aiube-avatar は entry を avatar.html にするだけ）。"
+      ],
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/aiube",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      }
     },
     "aiube-avatar": {
-      "build": { "kind": "static", "dir": "aiube-exercise-avatar/public" }
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/aiube",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
+      "entry": "avatar.html"
     },
     "block": {
       "$comment": "開発中。enabled を true にすると配信に含まれる",

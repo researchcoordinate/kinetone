@@ -235,6 +235,24 @@ async function buildApp(app) {
 }
 
 /**
+ * 配信ディレクトリの index.html を、必ずそのアプリの入口にする。
+ *
+ * Firebase Hosting は `/xxx/` の要求に対して**静的な index.html を先に返す**ので、
+ * rewrites では入口を差し替えられない。1 つの成果物を複数の入口で使うとき
+ * （あいうべ体操のメッシュ版とアバター版は同じ zip）に、別の版が出てしまう。
+ */
+async function ensureEntry(app) {
+  const entry = app.entry ?? 'index.html'
+  if (entry === 'index.html') return
+  const dir = resolve(site, app.id)
+  if (!(await exists(resolve(dir, entry)))) {
+    throw new Error(`${app.id}: 入口の ${entry} が見つかりません`)
+  }
+  await cp(resolve(dir, entry), resolve(dir, 'index.html'))
+  console.log(`  ・${entry} を入口（index.html）にしました`)
+}
+
+/**
  * 別リポジトリの GitHub Release から、ビルド済みの成果物を取ってくる。
  *
  * ソースからビルドしないのが要点。各自が好きなときに publish でき、
@@ -272,6 +290,7 @@ await mkdir(site, { recursive: true })
 
 for (const app of apps) {
   await buildApp(app)
+  await ensureEntry(app)
 }
 
 console.log('\n▶ ホーム画面を組み立て')
