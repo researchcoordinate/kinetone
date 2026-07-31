@@ -101,14 +101,14 @@ Vite の各アプリは npm の依存として取り込みます。**public リ�
 |---|---|---|---|
 | `multi-flower/` | `/flower/` | みんなの花畑（体を動かすと足元に花が育つ演出。ペット・BGM・効果音つき） | MediaPipe（既定）/ MoveNet 切替可 |
 | **別リポジトリ** [`researchcoordinate/hanabi`](https://github.com/researchcoordinate/hanabi) | `/hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる静的サイト） | TensorFlow.js MoveNet MultiPose |
-| `stepping/` | `/stepping/` | おさんぽ足踏み（その場足踏みリハビリゲーム） | MediaPipe Tasks Vision |
-| `stepping/` | `/steptest/` | 2分間足踏みテストの測定アプリ（同じソースの `measure.html`） | MediaPipe Tasks Vision |
+| **別リポジトリ** [`researchcoordinate/stepping`](https://github.com/researchcoordinate/stepping) | `/stepping/` | おさんぽ足踏み（その場足踏みリハビリゲーム） | MediaPipe Tasks Vision |
+| 同上 | `/steptest/` | 2分間足踏みテストの測定アプリ（同じ成果物の `measure.html`） | MediaPipe Tasks Vision |
 | **別リポジトリ** [`researchcoordinate/chair-stand`](https://github.com/researchcoordinate/chair-stand) | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST）の測定アプリ | MediaPipe Tasks Vision |
 | **別リポジトリ** [`researchcoordinate/aiube`](https://github.com/researchcoordinate/aiube) | `/aiube-avatar/` | あいうべ体操・アバター版（静的サイト） | MediaPipe Face Landmarker |
 | 同上 | `/aiube/` | あいうべ体操・フェイスメッシュ版（同じ Release の zip・入口だけ違う） | MediaPipe Face Landmarker |
 | `block/` | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） | MediaPipe Tasks Vision |
 
-このリポジトリに残っているアプリ（`stepping/` `multi-flower/` `block/`）はいずれも Vite
+このリポジトリに残っているアプリ（`multi-flower/` `block/`）はいずれも Vite
 プロジェクトで、依存関係もビルドも別々です。**作業はそのフォルダの中で行います**
 （リポジトリのルートに `package.json` は置いていません）。
 

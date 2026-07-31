@@ -37,7 +37,17 @@
       "spa": true
     },
     "stepping": {
-      "build": { "kind": "vite", "dir": "stepping", "setup": "setup:mediapipe", "needs": "public/mediapipe" },
+      "$comment": [
+        "別リポジトリへ切り出し済み。1 つの成果物から 2 つの入口を出している。",
+        "/stepping/ はおさんぽ（index.html）、/steptest/ は下の cards の rewriteTo で",
+        "同じディレクトリの measure.html を指す。"
+      ],
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/stepping",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
       "spa": true
     },
     "chair-stand": {
