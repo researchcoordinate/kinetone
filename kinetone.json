@@ -27,8 +27,9 @@
   },
 
   "groups": [
-    { "id": "play", "title": "楽しく鍛える" },
-    { "id": "measure", "title": "はかる", "tileClass": "tile--measure" }
+    { "id": "together", "title": "みんなで動く" },
+    { "id": "train", "title": "楽しく鍛える" },
+    { "id": "measure", "title": "体力をはかる", "tileClass": "tile--measure" }
   ],
 
   "apps": {
@@ -125,49 +126,44 @@
 
   "cards": [
     {
-      "group": "play",
+      "group": "together",
       "app": "flower",
       "name": "みんなの花畑",
       "desc": "カメラの前で体を動かすと、足元にお花が育ちます",
       "tag": "全身を動かす",
-      "people": "group",
       "thumb": "flower.jpg"
     },
     {
-      "group": "play",
+      "group": "together",
       "app": "hanabi",
       "name": "みんなで花火",
       "desc": "みんなで手を振ると、夜空に花火が上がります",
       "tag": "腕と肩を動かす",
-      "people": "group",
       "thumb": "hanabi.jpg"
     },
     {
-      "group": "play",
+      "group": "train",
       "app": "stepping",
       "name": "おさんぽ足踏み",
       "desc": "その場で足踏みすると、石畳の街が進みます",
       "tag": "足腰を鍛える",
-      "people": "solo",
       "thumb": "stepping.jpg"
     },
     {
       "$comment": "あいうべは中身は同じ体操で、口の動きをキャラクターで見るか自分の顔で見るかの違い。自分の顔が映るほうは抵抗を感じる方もいるので、キャラクター版を先に置く",
-      "group": "play",
+      "group": "train",
       "app": "aiube-avatar",
       "name": "あいうべ体操（キャラクター）",
       "desc": "キャラクターの口が一緒に動きます。自分の顔は映りません",
       "tag": "お口を鍛える",
-      "people": "solo",
       "thumb": "aiube-avatar.jpg"
     },
     {
-      "group": "play",
+      "group": "train",
       "app": "aiube",
       "name": "あいうべ体操",
       "desc": "自分の顔を見ながら「あ・い・う・べ」と口を大きく動かします",
       "tag": "お口を鍛える",
-      "people": "solo",
       "thumb": "aiube.jpg"
     },
     {
