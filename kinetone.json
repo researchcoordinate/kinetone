@@ -33,7 +33,13 @@
 
   "apps": {
     "flower": {
-      "build": { "kind": "vite", "dir": "multi-flower", "post": ["scripts/build-service-worker.mjs"] },
+      "$comment": "別リポジトリへ切り出し済み。Service Worker の生成まで向こうの npm run build に含む。",
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/flower",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
       "spa": true
     },
     "stepping": {
@@ -97,9 +103,17 @@
       "entry": "avatar.html"
     },
     "block": {
-      "$comment": "開発中。enabled を true にすると配信に含まれる",
+      "$comment": [
+        "開発中。enabled を true にすると配信に含まれる。",
+        "別リポジトリへ切り出し済みで、Release は作ってあるがホームには並べていない。"
+      ],
       "enabled": false,
-      "build": { "kind": "vite", "dir": "block", "setup": "setup:mediapipe", "needs": "public/mediapipe" },
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/block",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
       "spa": true
     }
   },

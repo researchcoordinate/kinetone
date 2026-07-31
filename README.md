@@ -99,22 +99,22 @@ Vite の各アプリは npm の依存として取り込みます。**public リ�
 
 | フォルダ | 統合サイトのパス | 内容 | 姿勢推定 |
 |---|---|---|---|
-| `multi-flower/` | `/flower/` | みんなの花畑（体を動かすと足元に花が育つ演出。ペット・BGM・効果音つき） | MediaPipe（既定）/ MoveNet 切替可 |
+| **別リポジトリ** [`researchcoordinate/flower`](https://github.com/researchcoordinate/flower) | `/flower/` | みんなの花畑（体を動かすと足元に花が育つ演出。ペット・BGM・効果音つき） | MediaPipe（既定）/ MoveNet 切替可 |
 | **別リポジトリ** [`researchcoordinate/hanabi`](https://github.com/researchcoordinate/hanabi) | `/hanabi/` | 夏だ！みんなで花火（みんなで手を振ると花火が上がる静的サイト） | TensorFlow.js MoveNet MultiPose |
 | **別リポジトリ** [`researchcoordinate/stepping`](https://github.com/researchcoordinate/stepping) | `/stepping/` | おさんぽ足踏み（その場足踏みリハビリゲーム） | MediaPipe Tasks Vision |
 | 同上 | `/steptest/` | 2分間足踏みテストの測定アプリ（同じ成果物の `measure.html`） | MediaPipe Tasks Vision |
 | **別リポジトリ** [`researchcoordinate/chair-stand`](https://github.com/researchcoordinate/chair-stand) | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST）の測定アプリ | MediaPipe Tasks Vision |
 | **別リポジトリ** [`researchcoordinate/aiube`](https://github.com/researchcoordinate/aiube) | `/aiube-avatar/` | あいうべ体操・アバター版（静的サイト） | MediaPipe Face Landmarker |
 | 同上 | `/aiube/` | あいうべ体操・フェイスメッシュ版（同じ Release の zip・入口だけ違う） | MediaPipe Face Landmarker |
-| `block/` | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） | MediaPipe Tasks Vision |
+| **別リポジトリ** [`researchcoordinate/block`](https://github.com/researchcoordinate/block) | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） | MediaPipe Tasks Vision |
 
-このリポジトリに残っているアプリ（`multi-flower/` `block/`）はいずれも Vite
-プロジェクトで、依存関係もビルドも別々です。**作業はそのフォルダの中で行います**
-（リポジトリのルートに `package.json` は置いていません）。
+**ゲームはすべて別リポジトリに出しました。**このリポジトリが持つのはホーム画面と、
+何をどのバージョンで載せるかの一覧（`kinetone.json`）だけです。ゲームのソースはここには
+ありません。**このリポジトリでゲームがビルドされることもありません**（固定したタグの
+成果物を取得して並べるだけ）。壊れたものを publish しない関門は各ゲーム側の CI です。
 
-別リポジトリへ出したゲームは、ビルド済みの成果物（Release の zip）を取り込むだけなので、
-**このリポジトリでビルドされません。**壊れたものを publish しない関門は各ゲーム側の CI です
-（型チェックとテストが通らないとリリースされません）。
+ゲームを直すときは、そのゲームのリポジトリで作業してタグを打ち、ここの `tag` を上げます。
+**別々のリポジトリで作業するので、複数人が同時に開発してもコミットが混ざりません。**
 
 ### 旧配信先（1 ゲーム 1 プロジェクト時代の名残り）
 
@@ -141,23 +141,15 @@ Vite の各アプリは npm の依存として取り込みます。**public リ�
 みんなの花畑は、カメラ至近の一人が主なので既定エンジンは MediaPipe。
 展示会の多人数用途は `?engine=movenet`。
 
-```bash
-cd stepping
-npm install
-npm run setup:mediapipe   # 姿勢推定のランタイムとモデル（初回のみ）
-npm run dev
-```
-
 **デプロイはリポジトリ直下から**行います（各アプリのフォルダからではありません）。
 
 ```bash
 npx firebase-tools deploy --only hosting   # 統合サイトへ配信（predeploy で全アプリをビルド）
 ```
 
-**このリポジトリに残っているアプリは、まとめてビルドし直されます。**そのため作業中の変更も
-一緒に公開されてしまいます。出したくないものは `kinetone.json` で `"enabled": false` に
-してください。`github-release` へ移したゲーム（hanabi）はこの影響を受けません（固定した
-`tag` の成果物しか取り込まないため）。**残りのゲームも順に移していく方針です。**
+デプロイでは、`kinetone.json` に書かれたタグの成果物を取得して `site/` に並べ、それを配信します。
+**ソースからビルドしないので、誰かの作業中のコードが混ざることはありません。**
+本番に出すものを変えるのは `tag` の書き換えだけで、戻すのも同じです。
 
 詳しい仕様・設計は各フォルダの README を参照してください。
 
