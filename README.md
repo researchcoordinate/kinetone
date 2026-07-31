@@ -64,6 +64,19 @@ npx firebase-tools deploy --only hosting   # 取得 → site/ を組み立て �
 
 ## ゲームを新しく追加する
 
+### 0. ひな形から始める
+
+**[`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) を複製してください。**
+下の「約束ごと」を満たした状態から始められます（カメラの選択・配信パスの設定・
+リリースのワークフロー・画面づくりの作法まで入っています）。
+
+```bash
+gh repo create researchcoordinate/<name> --private --template researchcoordinate/kinetone-template
+```
+
+複製したら、まず配信パス（`/example/` になっている箇所）を書き換えます。
+詳しい手順はテンプレートの README にあります。
+
 ### 1. ゲーム側が満たすこと（統合の約束ごと）
 
 | 項目 | 内容 |
@@ -75,9 +88,10 @@ npx firebase-tools deploy --only hosting   # 取得 → site/ を組み立て �
 | **外部依存** | **実行時に外部の CDN やモデル配信元へ取りに行かないこと**（後述の「方針」参照） |
 | **CI** | タグ push で型チェック・テスト・ビルドをして Release に zip を添付する |
 
-既存のゲームのワークフローをそのまま写すのが早いです
-（[chair-stand](https://github.com/researchcoordinate/chair-stand/blob/main/.github/workflows/release.yml) が Vite の例、
-[hanabi](https://github.com/researchcoordinate/hanabi/blob/main/.github/workflows/release.yml) が静的サイトの例）。
+ひな形を使えばここは満たされています。既存のゲームに合わせる場合は、
+[chair-stand](https://github.com/researchcoordinate/chair-stand/blob/main/.github/workflows/release.yml)（Vite）か
+[hanabi](https://github.com/researchcoordinate/hanabi/blob/main/.github/workflows/release.yml)（静的サイト）の
+ワークフローを写してください。
 
 ### 2. サムネイルを用意する
 
@@ -190,6 +204,7 @@ site/
 | モジュール | 中身 |
 |---|---|
 | [`@kinetone/camera`](https://github.com/researchcoordinate/kinetone-camera) | カメラの選択・保存・再接続と、歯車の設定パネル。依存なし・素の ES モジュールなので、Vite のアプリからもビルドの無い静的サイトからも使えます |
+| [`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) | ゲームを新しく作るときのひな形（モジュールではありませんが、共通の作法はここに集めています） |
 
 **public リポジトリなので、開発者ごと・CI ごとのトークン設定は要りません。**
 
@@ -220,6 +235,8 @@ site/
 | [`aiube`](https://github.com/researchcoordinate/aiube) | `/aiube/` | あいうべ体操・自分の顔版 |
 | 同上 | `/aiube-avatar/` | あいうべ体操・キャラクター版（同じ zip・入口だけ違う） |
 | [`block`](https://github.com/researchcoordinate/block) | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） |
+
+新しく作るときの出発点は [`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) です。
 
 各ゲームの仕様・設計は、それぞれのリポジトリの README を参照してください。
 
