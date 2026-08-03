@@ -29,6 +29,16 @@
   textarea{width:100%;height:200px;background:#0a1120;color:#9db0d0;border:1px solid #24314c;
            border-radius:8px;font-family:ui-monospace,monospace;font-size:11px;padding:8px}
   .hint{font-size:13px;color:#ffc861;margin:8px 0 0}
+  .note{font-size:13px;color:#9db0d0;margin:0 0 10px;line-height:1.6}
+  .note b{color:#e8eefc}
+  /* 押しやすさ優先。タブレットを持った手で確実に当たる大きさにする。 */
+  ol.tune{list-style:none;margin:0;padding:0}
+  ol.tune li{margin:0 0 8px}
+  ol.tune a{display:block;min-height:56px;padding:12px 14px;border-radius:10px;
+            background:#1d2a44;border:1px solid #33456b;color:#cfe0ff;
+            text-decoration:none;font-size:15px;font-weight:600}
+  ol.tune li span{display:block;padding:4px 14px 0;font-size:12px;color:#8ba0c4}
+  .note a{color:#8fd3ff}
   #crash{background:#3a1620;border:1px solid #7a2a3a;color:#ffb4b4;border-radius:10px;
          padding:10px 12px;margin:0 0 12px;font-size:13px;white-space:pre-wrap;display:none}
 </style>
@@ -66,6 +76,29 @@
   <h2>保存されている設定</h2>
   <dl id="saved"></dl>
   <button class="sub" id="reset">保存したカメラの選択を消す</button>
+</section>
+
+<!--
+  みんなの花畑の速さ比べ。
+  設定は URL のクエリで変えられる（kinetone-flower の applyUrlOverrides）。
+  長い URL をタブレットで打つのは無理なので、押すだけにしてある。
+  ?debug=1 を付けたときだけ fps と推論時間が画面に出る。速さ自体は変わらない。
+-->
+<section>
+  <h2>みんなの花畑の速さを測る</h2>
+  <p class="note">押すと花畑が開きます。画面に出る <b>描画 fps</b>・<b>推論 fps</b>・<b>推論時間</b> を見て、
+     ここへ戻って（ブラウザの戻る）次を押してください。</p>
+  <ol class="tune">
+    <li><a href="/flower/?debug=1">① 今の設定（topdown / 640）</a>
+        <span>いちばん重い組み合わせ</span></li>
+    <li><a href="/flower/?engine=movenet&amp;backend=webgl&amp;dim=256&amp;debug=1">② 軽くする（movenet / 256）</a>
+        <span>多人数向き。近づいて見切れると弱い</span></li>
+    <li><a href="/flower/?engine=topdown&amp;backend=webgl&amp;dim=320&amp;debug=1">③ 中間（topdown / 320）</a>
+        <span>方式はそのまま、解像度だけ下げる</span></li>
+    <li><a href="/flower/?engine=mediapipe&amp;mpmodel=lite&amp;mpdelegate=GPU&amp;debug=1">④ 最速（1人だけ検出）</a>
+        <span>採用候補ではなく、この端末の上限を知るための物差し</span></li>
+  </ol>
+  <p class="note">終わったら <a href="/flower/">ふつうに開く</a>（設定は残りません）。</p>
 </section>
 
 <section>
