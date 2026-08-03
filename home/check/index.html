@@ -101,6 +101,28 @@
   <p class="note">終わったら <a href="/flower/">ふつうに開く</a>（設定は残りません）。</p>
 </section>
 
+<!--
+  みんなで花火の調整。表紙の右下に版番号が出るので、まずそこを見れば
+  「新しいものが来ているか（＝キャッシュかどうか）」が分かる。
+-->
+<section>
+  <h2>みんなで花火を調整する</h2>
+  <p class="note">表紙の「始める」の下に <b>版番号</b>が出ます。<b>v0.2.1 以上</b>なら新しいものです。
+     それより古ければキャッシュなので、ページを引き下げて更新してください。</p>
+  <ol class="tune">
+    <li><a href="/hanabi/?debug=1">① 今の設定で測る</a>
+        <span>描画fps・推論fps・推論時間が左下に出ます</span></li>
+    <li><a href="/hanabi/?debug=1&amp;low=1&amp;dim=256&amp;people=4">② 軽くする（256px / 4人）</a>
+        <span>推論に渡す絵を小さくする</span></li>
+    <li><a href="/hanabi/?debug=1&amp;low=1&amp;dim=192&amp;people=3&amp;spark=50">③ もっと軽く（192px / 3人）</a>
+        <span>遠くの人を取りこぼしやすくなります</span></li>
+    <li><a href="/hanabi/?debug=1&amp;low=1&amp;dim=192&amp;model=single&amp;spark=50">④ 最速（1人だけ検出）</a>
+        <span>上限を知るための物差し。みんなでは遊べません</span></li>
+  </ol>
+  <p class="note"><b>描画 fps</b> が映像のなめらかさです。20 を超えれば実用になります。
+     <a href="/hanabi/">ふつうに開く</a></p>
+</section>
+
 <section>
   <h2>この内容をそのまま送る</h2>
   <textarea id="dump" readonly></textarea>
