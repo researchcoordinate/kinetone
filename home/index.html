@@ -71,10 +71,13 @@
   .tile .body{display:block;flex:1;padding:clamp(12px,1.6vw,18px) clamp(16px,2vw,22px) clamp(14px,2vw,20px);}
   /* どこを動かす遊びか・何人で遊ぶかを一目で分かるように */
   .tile .tags{display:flex;flex-wrap:wrap;gap:.4em;margin-bottom:.55em;}
-  .tile .tag{display:inline-block;
-             font-size:clamp(12px,1.4vw,15px);font-weight:800;letter-spacing:.04em;
+  /* 長いタグ（「立ち座りの力と持久力をはかる」など）は 1 行だとカードからはみ出して
+     右側が切れるので、収まらなければ折り返す */
+  .tile .tag{display:inline-block;max-width:100%;
+             font-size:clamp(11.5px,1.3vw,15px);font-weight:800;letter-spacing:.03em;
              color:#0b7a67;background:#0e8f7914;border:1px solid #0e8f7938;
-             padding:.25em .9em;border-radius:999px;white-space:nowrap;}
+             padding:.25em .9em;border-radius:999px;
+             white-space:normal;line-height:1.45;}
   /* 人数は色を変える。みんなで＝レクの時間、ひとりで＝日々の運動 */
   .tile .tag--group{color:#9a5410;background:#f2a13a1f;border-color:#f2a13a55;}
   .tile .tag--solo{color:#4a5b73;background:#4a5b7314;border-color:#4a5b7333;}
