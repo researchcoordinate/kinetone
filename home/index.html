@@ -37,8 +37,8 @@
            padding:14px 18px;margin-bottom:20px;color:#5c3b0e;}
   #too-old strong{font-size:1.15em;}
   #too-old p{margin:.4em 0 0;font-size:1em;line-height:1.6;}
-  #too-old .detail{font-size:.9em;color:#7a5a2a;}
-  #too-old a{color:#8a4b00;}
+  #too-old .detail{font-size:.85em;color:#8a6b3a;}
+  #too-old .detail:empty{display:none;}
   h1{margin:0;font-size:clamp(18px,2.4vw,26px);font-weight:800;letter-spacing:.02em;}
   h1 .brand{color:var(--accent);letter-spacing:.18em;}
   h1 .kana{color:var(--text-dim);font-weight:700;font-size:.8em;letter-spacing:.06em;}
@@ -117,7 +117,9 @@
   <div id="too-old" hidden>
     <strong>このタブレットでは、ゲームが動きません。</strong>
     <p>ブラウザ（Chrome）が古いためです。Play ストアで Chrome を更新すると使えるようになります。</p>
-    <p class="detail"><a href="./check/">くわしく調べる</a></p>
+    <!-- 版の数字は script が入れる。連絡をもらうときの手がかりにするだけなので、
+         空のままでも文章として成り立つようにしておく。 -->
+    <p class="detail"></p>
   </div>
   <script>
     (function () {
@@ -135,8 +137,7 @@
         el.hidden = false
         var v = (navigator.userAgent.match(/Chrome\/(\d+)/) || [])[1]
         if (v) {
-          el.querySelector('.detail').insertAdjacentHTML(
-            'afterbegin', '<span>いまの版: Chrome ' + v + '（必要: 85 以上）</span>　')
+          el.querySelector('.detail').textContent = 'いまの版: Chrome ' + v + '（必要: 85 以上）'
         }
       }
     })()
