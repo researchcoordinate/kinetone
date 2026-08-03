@@ -52,7 +52,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-stepping",
-        "tag": "v0.3.1",
+        "tag": "v0.3.2",
         "asset": "dist.zip"
       },
       "spa": true
