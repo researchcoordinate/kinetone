@@ -26,15 +26,21 @@
   video{width:100%;max-width:420px;border-radius:10px;background:#000;display:block;margin:8px 0 0}
   ul{margin:6px 0 0;padding-left:20px;font-size:13px}
   li{margin:2px 0}
-  textarea{width:100%;height:180px;background:#0a1120;color:#9db0d0;border:1px solid #24314c;
+  textarea{width:100%;height:200px;background:#0a1120;color:#9db0d0;border:1px solid #24314c;
            border-radius:8px;font-family:ui-monospace,monospace;font-size:11px;padding:8px}
   .hint{font-size:13px;color:#ffc861;margin:8px 0 0}
+  #crash{background:#3a1620;border:1px solid #7a2a3a;color:#ffb4b4;border-radius:10px;
+         padding:10px 12px;margin:0 0 12px;font-size:13px;white-space:pre-wrap;display:none}
 </style>
 </head>
 <body>
 
 <h1>kinetone 動作チェック</h1>
 <p class="lead">うまく動かない端末で、このページを開いてください。原因の切り分けに使います。</p>
+
+<!-- このページ自身が落ちたときに黙って止まらないよう、画面に出す。
+     チェック用のページで原因が分からなくなるのが一番困る。 -->
+<div id="crash"></div>
 
 <button id="try">カメラを試す</button>
 <p class="hint" id="hint">※ 許可を求められたら「許可」を押してください。</p>
@@ -69,162 +75,278 @@
 </section>
 
 <script>
-// 共通モジュールと同じ選び方（site/shared/camera/camera.js より）。
-// ここで同じ結果を再現できれば、アプリ側の挙動もこれで説明がつく。
-const AVOID_LABEL = /iPhone|FaceTime|Continuity/i
-function pickDevice(devices, saved) {
-  if (!devices || devices.length === 0) return null
-  if (saved && saved.deviceId) {
-    const byId = devices.find(d => d.deviceId === saved.deviceId)
-    if (byId) return byId
-  }
-  if (saved && saved.label) {
-    const byLabel = devices.find(d => d.label && d.label === saved.label)
-    if (byLabel) return byLabel
-  }
-  const external = devices.find(d => !AVOID_LABEL.test(d.label || ''))
-  return external || devices[0]
+/* ────────────────────────────────────────────────────────────
+   このページの作りかたの決めごと
+
+   1. 何があっても画面に出す。例外は #crash に表示して握りつぶさない。
+   2. ボタンの登録を最初にやる。調べる処理が失敗しても押せるようにする。
+      （最初の版は WebGL2RenderingContext が無い端末で例外になり、
+        登録前に止まってボタンが無反応になった。）
+   3. 未定義かもしれないものは typeof で確かめてから触る。
+      動かない端末ほど、あるはずのものが無い。
+   ──────────────────────────────────────────────────────────── */
+
+var lines = []
+var crashed = []
+
+function showCrash() {
+  var el = document.getElementById('crash')
+  el.style.display = 'block'
+  el.textContent = '⚠ このページの処理でエラーが出ました（それ自体が手がかりです）\n' + crashed.join('\n')
 }
-
-const lines = []
-const row = (dl, key, value, cls) => {
-  lines.push(`${key}: ${value}`)
-  const dt = document.createElement('dt'); dt.textContent = key
-  const dd = document.createElement('dd'); dd.textContent = value
-  if (cls) dd.className = cls
-  document.getElementById(dl).append(dt, dd)
-}
-
-// ── 端末・ブラウザ ─────────────────────────────
-const ua = navigator.userAgent
-const chrome = (ua.match(/Chrome\/(\d+)/) || [])[1]
-row('env', 'ブラウザ', chrome ? `Chrome ${chrome}` : '(Chrome ではない)',
-    chrome ? (Number(chrome) >= 100 ? 'ok' : 'ng') : 'warn')
-row('env', '画面', `${screen.width}×${screen.height} / 表示倍率 ${devicePixelRatio}`)
-row('env', '向き', (screen.orientation && screen.orientation.type) || '不明')
-row('env', 'UA', ua)
-row('env', 'HTTPS', isSecureContext ? 'はい' : 'いいえ（カメラは使えません）',
-    isSecureContext ? 'ok' : 'ng')
-
-// ── ゲームが使う機能 ───────────────────────────
-row('feat', 'カメラAPI', navigator.mediaDevices ? 'あり' : 'なし',
-    navigator.mediaDevices ? 'ok' : 'ng')
-
-let gl = null
-try {
-  const c = document.createElement('canvas')
-  gl = c.getContext('webgl2') || c.getContext('webgl')
-} catch (e) {}
-row('feat', 'WebGL', gl ? (gl instanceof WebGL2RenderingContext ? 'WebGL2' : 'WebGL1のみ') : 'なし',
-    gl ? (gl instanceof WebGL2RenderingContext ? 'ok' : 'warn') : 'ng')
-if (gl) {
-  const dbg = gl.getExtension('WEBGL_debug_renderer_info')
-  row('feat', 'GPU', dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : '(非公開)')
-  row('feat', 'テクスチャ上限', String(gl.getParameter(gl.MAX_TEXTURE_SIZE)))
-}
-
-// MediaPipe / TensorFlow.js は WASM の SIMD が無いと極端に遅い（実質動かない）
-const SIMD = new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11])
-let simd = false
-try { simd = WebAssembly.validate(SIMD) } catch (e) {}
-row('feat', 'WASM', typeof WebAssembly === 'object' ? 'あり' : 'なし',
-    typeof WebAssembly === 'object' ? 'ok' : 'ng')
-row('feat', 'WASM SIMD', simd ? 'あり' : 'なし（姿勢・顔の検出がとても遅くなります）',
-    simd ? 'ok' : 'ng')
-row('feat', 'メモリ上限の目安', navigator.deviceMemory ? `${navigator.deviceMemory} GB` : '不明')
-row('feat', 'CPU', navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} コア` : '不明')
-
-navigator.serviceWorker?.getRegistrations?.().then(rs => {
-  row('feat', '登録済みSW', rs.length ? rs.map(r => r.scope.replace(location.origin, '')).join(' , ') : 'なし')
+window.onerror = function (message, src, line, col) {
+  crashed.push(message + '  (' + line + ':' + col + ')')
+  showCrash()
   dump()
-}).catch(() => {})
-
-// ── 保存されている設定 ─────────────────────────
-let saved = null
-try { saved = JSON.parse(localStorage.getItem('kinetone.camera.v1') || 'null') } catch (e) {}
-row('saved', '選択中のカメラ', saved ? (saved.label || '(名前なし)') : '未設定')
-row('saved', 'deviceId', saved ? String(saved.deviceId || '').slice(0, 24) + '…' : '—')
-
-document.getElementById('reset').onclick = () => {
-  localStorage.removeItem('kinetone.camera.v1')
-  alert('消しました。ページを開き直してください。')
 }
 
-// ── カメラを実際に開く ─────────────────────────
-document.getElementById('try').onclick = async () => {
-  const box = document.getElementById('camera')
-  document.getElementById('camera-box').hidden = false
-  document.getElementById('hint').hidden = true
-  box.textContent = '確認中…'
+/** 1 行足す。ここで失敗すると何も見えなくなるので、絶対に投げない。 */
+function row(dl, key, value, cls) {
   try {
-    // 1. 権限を取る（ここで初めてカメラ名が読める）
-    const probe = await navigator.mediaDevices.getUserMedia({ video: true })
-    const probeLabel = (probe.getVideoTracks()[0] || {}).label || '(名前なし)'
-    for (const t of probe.getTracks()) t.stop()
+    lines.push(key + ': ' + value)
+    var host = document.getElementById(dl)
+    if (!host) return
+    var dt = document.createElement('dt'); dt.textContent = key
+    var dd = document.createElement('dd'); dd.textContent = value
+    if (cls) dd.className = cls
+    host.appendChild(dt); host.appendChild(dd)
+  } catch (e) {}
+}
 
-    // 2. 一覧
-    const all = await navigator.mediaDevices.enumerateDevices()
-    const cams = all.filter(d => d.kind === 'videoinput')
-
-    // 3. 共通モジュールと同じ選び方で決める
-    const picked = pickDevice(cams, saved)
-
-    // 4. 実際に開く（アプリと同じ条件）
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        ...(picked ? { deviceId: { exact: picked.deviceId } } : {}),
-        width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 },
-      },
-      audio: false,
-    })
-    const track = stream.getVideoTracks()[0]
-    const s = track.getSettings()
-    const v = document.getElementById('preview')
-    v.srcObject = stream
-    await v.play().catch(() => {})
-
-    box.innerHTML = ''
-    const dl = document.createElement('dl'); dl.id = 'cam'; box.append(dl)
-    row('cam', '見つかったカメラ', `${cams.length} 台`)
-    const ul = document.createElement('ul')
-    cams.forEach((d, i) => {
-      const li = document.createElement('li')
-      li.textContent = `${i}: ${d.label || '(名前なし)'}`
-      if (picked && d.deviceId === picked.deviceId) { li.textContent += '  ← これが選ばれました'; li.className = 'warn' }
-      lines.push(`カメラ${i}: ${d.label}`)
-      ul.append(li)
-    })
-    box.append(ul)
-    row('cam', '最初に開いたもの', probeLabel)
-    row('cam', '実際に開いたもの', track.label || '(名前なし)')
-    row('cam', '向き(facingMode)', s.facingMode || '(申告なし)',
-        s.facingMode === 'user' ? 'ok' : 'warn')
-    row('cam', '解像度', `${s.width}×${s.height} / ${Math.round(s.frameRate || 0)}fps`)
-
-    const facingBack = /back|environment|背面|rear/i.test(track.label || '') || s.facingMode === 'environment'
-    const hint = document.getElementById('mirror-hint')
-    hint.hidden = false
-    hint.textContent = facingBack
-      ? '⚠ 背面（外向き）のカメラが開いています。自分が映らないため、ゲームは反応しません。'
-      : '映像に自分が映っていれば、カメラ側は正常です。'
-    dump()
+/** 調べる処理をひとつ包む。落ちてもそこだけ「調べられません」にして先へ進む。 */
+function probe(dl, key, fn) {
+  try {
+    var r = fn()
+    if (r) row(dl, key, r.value, r.cls)
   } catch (e) {
-    box.innerHTML = ''
-    row('cam', 'エラー', `${e.name}: ${e.message}`, 'ng')
-    dump()
+    row(dl, key, '調べられません（' + e.name + ': ' + e.message + '）', 'ng')
   }
 }
 
 function dump() {
-  document.getElementById('dump').value = lines.join('\n')
+  var t = document.getElementById('dump')
+  if (t) t.value = lines.join('\n') + (crashed.length ? '\n--- エラー ---\n' + crashed.join('\n') : '')
 }
-dump()
 
-document.getElementById('copy').onclick = async () => {
-  const t = document.getElementById('dump')
-  try { await navigator.clipboard.writeText(t.value); alert('コピーしました') }
-  catch (e) { t.select(); alert('文字を選んで、長押しでコピーしてください') }
+/* ── 1. ボタンの登録を先に済ませる ───────────────────────── */
+
+// 共通モジュールと同じ選び方（site/shared/camera/camera.js より）。
+// 同じ結果が再現できれば、アプリ側の挙動もこれで説明がつく。
+var AVOID_LABEL = /iPhone|FaceTime|Continuity/i
+function pickDevice(devices, saved) {
+  if (!devices || devices.length === 0) return null
+  if (saved && saved.deviceId) {
+    for (var i = 0; i < devices.length; i++) {
+      if (devices[i].deviceId === saved.deviceId) return devices[i]
+    }
+  }
+  if (saved && saved.label) {
+    for (var j = 0; j < devices.length; j++) {
+      if (devices[j].label && devices[j].label === saved.label) return devices[j]
+    }
+  }
+  for (var k = 0; k < devices.length; k++) {
+    if (!AVOID_LABEL.test(devices[k].label || '')) return devices[k]
+  }
+  return devices[0]
 }
+
+var saved = null
+try { saved = JSON.parse(localStorage.getItem('kinetone.camera.v1') || 'null') } catch (e) {}
+
+document.getElementById('try').onclick = function () {
+  var box = document.getElementById('camera')
+  document.getElementById('camera-box').hidden = false
+  document.getElementById('hint').hidden = true
+  box.textContent = '確認中…'
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    box.innerHTML = '<dl id="cam"></dl>'
+    row('cam', 'カメラAPI', 'この端末では使えません（mediaDevices がありません）', 'ng')
+    dump()
+    return
+  }
+
+  // 1. 権限を取る（ここで初めてカメラ名が読める）
+  navigator.mediaDevices.getUserMedia({ video: true }).then(function (probeStream) {
+    var t0 = probeStream.getVideoTracks()[0]
+    var probeLabel = (t0 && t0.label) || '(名前なし)'
+    var tracks = probeStream.getTracks()
+    for (var i = 0; i < tracks.length; i++) tracks[i].stop()
+
+    // 2. 一覧
+    return navigator.mediaDevices.enumerateDevices().then(function (all) {
+      var cams = all.filter(function (d) { return d.kind === 'videoinput' })
+      var picked = pickDevice(cams, saved)
+
+      // 3. アプリと同じ条件で開く
+      var video = {
+        width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 },
+      }
+      if (picked) video.deviceId = { exact: picked.deviceId }
+
+      return navigator.mediaDevices.getUserMedia({ video: video, audio: false })
+        .then(function (stream) {
+          var track = stream.getVideoTracks()[0]
+          var s = (track && track.getSettings) ? track.getSettings() : {}
+          var v = document.getElementById('preview')
+          v.srcObject = stream
+          var p = v.play(); if (p && p.catch) p.catch(function () {})
+
+          box.innerHTML = '<dl id="cam"></dl>'
+          row('cam', '見つかったカメラ', cams.length + ' 台')
+          var ul = document.createElement('ul')
+          for (var n = 0; n < cams.length; n++) {
+            var li = document.createElement('li')
+            li.textContent = n + ': ' + (cams[n].label || '(名前なし)')
+            if (picked && cams[n].deviceId === picked.deviceId) {
+              li.textContent += '  ← これが選ばれました'
+              li.className = 'warn'
+            }
+            lines.push('カメラ' + n + ': ' + cams[n].label)
+            ul.appendChild(li)
+          }
+          box.appendChild(ul)
+          row('cam', '最初に開いたもの', probeLabel)
+          row('cam', '実際に開いたもの', (track && track.label) || '(名前なし)')
+          row('cam', '向き(facingMode)', s.facingMode || '(申告なし)',
+              s.facingMode === 'user' ? 'ok' : 'warn')
+          row('cam', '解像度', s.width + '×' + s.height + ' / ' + Math.round(s.frameRate || 0) + 'fps')
+
+          var label = (track && track.label) || ''
+          var back = /back|environment|背面|rear/i.test(label) || s.facingMode === 'environment'
+          var hint = document.getElementById('mirror-hint')
+          hint.hidden = false
+          hint.textContent = back
+            ? '⚠ 背面（外向き）のカメラが開いています。自分が映らないため、ゲームは反応しません。'
+            : '映像に自分が映っていれば、カメラ側は正常です。'
+          dump()
+        })
+    })
+  }).catch(function (e) {
+    box.innerHTML = '<dl id="cam"></dl>'
+    row('cam', 'エラー', e.name + ': ' + e.message, 'ng')
+    dump()
+  })
+}
+
+document.getElementById('reset').onclick = function () {
+  try { localStorage.removeItem('kinetone.camera.v1') } catch (e) {}
+  alert('消しました。ページを開き直してください。')
+}
+
+document.getElementById('copy').onclick = function () {
+  var t = document.getElementById('dump')
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t.value).then(
+      function () { alert('コピーしました') },
+      function () { t.select(); alert('文字を選んで、長押しでコピーしてください') })
+  } else {
+    t.select(); alert('文字を選んで、長押しでコピーしてください')
+  }
+}
+
+/* ── 2. 端末・ブラウザ ──────────────────────────────────── */
+
+probe('env', 'ブラウザ', function () {
+  var ua = navigator.userAgent
+  var m = ua.match(/Chrome\/(\d+)/)
+  var wv = /; wv\)/.test(ua) || /\bWebView\b/i.test(ua)
+  if (!m) return { value: '(Chrome ではありません)', cls: 'warn' }
+  var n = Number(m[1])
+  return {
+    value: 'Chrome ' + n + (wv ? '（アプリ内ブラウザ／WebView）' : ''),
+    cls: wv ? 'warn' : (n >= 100 ? 'ok' : 'ng'),
+  }
+})
+probe('env', 'Android', function () {
+  var m = navigator.userAgent.match(/Android (\d+(\.\d+)?)/)
+  return { value: m ? m[1] : '(Android ではありません)' }
+})
+probe('env', '画面', function () {
+  return { value: screen.width + '×' + screen.height + ' / 表示倍率 ' + devicePixelRatio }
+})
+probe('env', '向き', function () {
+  return { value: (screen.orientation && screen.orientation.type) || '不明' }
+})
+probe('env', 'HTTPS', function () {
+  return { value: isSecureContext ? 'はい' : 'いいえ（カメラは使えません）',
+           cls: isSecureContext ? 'ok' : 'ng' }
+})
+probe('env', 'UA', function () { return { value: navigator.userAgent } })
+
+/* ── 3. ゲームが使う機能 ────────────────────────────────── */
+
+probe('feat', 'カメラAPI', function () {
+  var has = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+  return { value: has ? 'あり' : 'なし', cls: has ? 'ok' : 'ng' }
+})
+
+// WebGL2RenderingContext は存在しない端末がある。typeof で確かめてから触る。
+var gl = null
+var glKind = 'なし'
+probe('feat', 'WebGL', function () {
+  var c = document.createElement('canvas')
+  if (typeof WebGL2RenderingContext !== 'undefined') {
+    try { gl = c.getContext('webgl2') } catch (e) {}
+    if (gl) glKind = 'WebGL2'
+  }
+  if (!gl) {
+    try { gl = c.getContext('webgl') || c.getContext('experimental-webgl') } catch (e) {}
+    if (gl) glKind = 'WebGL1 のみ（姿勢・顔の検出が動きません）'
+  }
+  return { value: glKind, cls: glKind === 'WebGL2' ? 'ok' : 'ng' }
+})
+probe('feat', 'GPU', function () {
+  if (!gl) return { value: '—' }
+  var dbg = gl.getExtension('WEBGL_debug_renderer_info')
+  return { value: dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '(非公開)' }
+})
+probe('feat', 'テクスチャ上限', function () {
+  if (!gl) return { value: '—' }
+  return { value: String(gl.getParameter(gl.MAX_TEXTURE_SIZE)) }
+})
+
+probe('feat', 'WASM', function () {
+  var has = typeof WebAssembly === 'object' && typeof WebAssembly.validate === 'function'
+  return { value: has ? 'あり' : 'なし', cls: has ? 'ok' : 'ng' }
+})
+probe('feat', 'WASM SIMD', function () {
+  // MediaPipe / TensorFlow.js は SIMD が無いと実用速度に届かない
+  if (typeof WebAssembly !== 'object' || !WebAssembly.validate) return { value: '—', cls: 'ng' }
+  var bytes = new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11])
+  var ok = WebAssembly.validate(bytes)
+  return { value: ok ? 'あり' : 'なし（検出がとても遅くなります）', cls: ok ? 'ok' : 'ng' }
+})
+probe('feat', 'メモリの目安', function () {
+  return { value: navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '不明' }
+})
+probe('feat', 'CPU', function () {
+  return { value: navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' コア' : '不明' }
+})
+
+/* ── 4. 保存されている設定 ──────────────────────────────── */
+
+probe('saved', '選択中のカメラ', function () {
+  return { value: saved ? (saved.label || '(名前なし)') : '未設定' }
+})
+probe('saved', 'deviceId', function () {
+  return { value: saved ? String(saved.deviceId || '').slice(0, 24) + '…' : '—' }
+})
+
+/* ── 5. 非同期のもの ────────────────────────────────────── */
+
+try {
+  if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+    navigator.serviceWorker.getRegistrations().then(function (rs) {
+      var names = rs.map(function (r) { return r.scope.replace(location.origin, '') })
+      row('feat', '登録済みSW', names.length ? names.join(' , ') : 'なし')
+      dump()
+    }, function () {})
+  }
+} catch (e) {}
+
+dump()
 </script>
 </body>
 </html>
