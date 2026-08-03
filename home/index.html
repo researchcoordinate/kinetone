@@ -32,6 +32,13 @@
 
   /* 見出しは小さく。1画面のうちタイルに使える面積を最優先する */
   header{display:flex;align-items:baseline;gap:.5em 1em;flex-wrap:wrap;margin-bottom:clamp(12px,2vh,20px);}
+  /* 古いブラウザへの警告。古い端末でも崩れないよう、素直な指定だけで書く。 */
+  #too-old{background:#fff4e5;border:2px solid #d98324;border-radius:12px;
+           padding:14px 18px;margin-bottom:20px;color:#5c3b0e;}
+  #too-old strong{font-size:1.15em;}
+  #too-old p{margin:.4em 0 0;font-size:1em;line-height:1.6;}
+  #too-old .detail{font-size:.9em;color:#7a5a2a;}
+  #too-old a{color:#8a4b00;}
   h1{margin:0;font-size:clamp(18px,2.4vw,26px);font-weight:800;letter-spacing:.02em;}
   h1 .brand{color:var(--accent);letter-spacing:.18em;}
   h1 .kana{color:var(--text-dim);font-weight:700;font-size:.8em;letter-spacing:.06em;}
@@ -95,6 +102,45 @@
   <header>
     <h1><span class="brand">KINETONE</span><span class="kana">：キネトーン</span>　高齢者向け体感ゲーム</h1>
   </header>
+
+  <!--
+    ブラウザが古すぎる端末への警告。
+
+    施設のタブレットには Chrome 81（2020年）のような古いものがある。
+    ゲームの JS には論理代入（a ||= b, Chrome 85 以降）が含まれるため、
+    古い Chrome は**読み込んだ瞬間に構文エラー**になり、画面が出ないまま止まる。
+    職員には「壊れている」のか「操作を間違えた」のか区別がつかない。
+
+    UA では判定しない（機種ごとに嘘が多い）。実際に構文を解釈させて確かめる。
+    この script は type="module" にしないこと。古いブラウザにも読ませる必要がある。
+  -->
+  <div id="too-old" hidden>
+    <strong>このタブレットでは、ゲームが動きません。</strong>
+    <p>ブラウザ（Chrome）が古いためです。Play ストアで Chrome を更新すると使えるようになります。</p>
+    <p class="detail"><a href="./check/">くわしく調べる</a></p>
+  </div>
+  <script>
+    (function () {
+      var ok = true
+      try {
+        // 論理代入（Chrome 85 以降）。ゲームのビルドに含まれている。
+        new Function('var a = null; a ||= 1; return a')
+      } catch (e) {
+        // 構文エラーのときだけ古いと判断する。CSP で new Function が
+        // 止められた場合（EvalError）に誤って警告を出さないため。
+        ok = !(e && e.name === 'SyntaxError')
+      }
+      if (!ok) {
+        var el = document.getElementById('too-old')
+        el.hidden = false
+        var v = (navigator.userAgent.match(/Chrome\/(\d+)/) || [])[1]
+        if (v) {
+          el.querySelector('.detail').insertAdjacentHTML(
+            'afterbegin', '<span>いまの版: Chrome ' + v + '（必要: 85 以上）</span>　')
+        }
+      }
+    })()
+  </script>
 
   <main>
     <!--
