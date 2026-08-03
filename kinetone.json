@@ -62,7 +62,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-chair-stand",
-        "tag": "v0.3.3",
+        "tag": "v0.3.4",
         "asset": "dist.zip"
       },
       "spa": true
@@ -193,7 +193,7 @@
       "name": "30秒椅子立ち上がりテスト（CS-30）",
       "desc": "30秒間に立ち座りできた回数を数え、年代・性別の基準と比べます",
       "tag": "立ち座りの力をはかる",
-      "thumb": "chair-stand.jpg"
+      "thumb": "cs30.jpg"
     }
   ]
 }
