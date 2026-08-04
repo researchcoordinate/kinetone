@@ -141,14 +141,6 @@
   "cards": [
     {
       "group": "together",
-      "app": "balloon",
-      "name": "風船わり",
-      "desc": "手を動かすと、そこの風船がわれます",
-      "tag": "腕を伸ばす",
-      "thumb": "balloon.jpg"
-    },
-    {
-      "group": "together",
       "app": "flower",
       "name": "みんなの花畑",
       "desc": "カメラの前で体を動かすと、足元にお花が育ちます",
@@ -162,6 +154,14 @@
       "desc": "みんなで手を振ると、夜空に花火が上がります",
       "tag": "腕と肩を動かす",
       "thumb": "hanabi.jpg"
+    },
+    {
+      "group": "together",
+      "app": "balloon",
+      "name": "風船わり",
+      "desc": "手を動かすと、そこの風船がわれます",
+      "tag": "腕を伸ばす",
+      "thumb": "balloon.jpg"
     },
     {
       "group": "train",
