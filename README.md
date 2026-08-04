@@ -151,6 +151,9 @@ python3 -m http.server 8080 --directory site
 sips -s format jpeg -s formatOptions 80 -z 270 480 /tmp/shot.png --out home/thumbs/<name>.jpg
 ```
 
+**ゲームの中で使う BGM と画像は、出どころが決まっています。**
+下の「[素材（BGM・画像）](#素材bgm画像)」を読んでから用意してください。
+
 ### 3. `kinetone.json` に 2 か所足す
 
 ```jsonc
@@ -295,6 +298,7 @@ site/
 |---|---|
 | [`@kinetone/camera`](https://github.com/researchcoordinate/kinetone-camera) | カメラの選択・保存・再接続と、歯車の設定パネル。依存なし・素の ES モジュールなので、Vite のアプリからもビルドの無い静的サイトからも使えます |
 | [`@kinetone/voice`](https://github.com/researchcoordinate/kinetone-voice) | 案内・ペットの音声を Google Cloud TTS で作る（ビルド時のみ）。**あそぶ = Despina / はかる = ja-JP-Neural2-B** の使い分けをここが持ちます |
+| [`@kinetone/motion`](https://github.com/researchcoordinate/kinetone-motion) | **画面の動きだけを見る検出**（骨格推定を使わない）。1 コマ 1ms 未満で、古いタブレットでも動きます。「検出されない人が出ない」ので、うまく動けない方が弾かれません |
 | [`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) | ゲームを新しく作るときのひな形（モジュールではありませんが、共通の作法はここに集めています） |
 
 **public リポジトリなので、開発者ごと・CI ごとのトークン設定は要りません。**
@@ -315,6 +319,46 @@ TTS を呼びません。課金先は `GOOGLE_TTS_PROJECT=kinetone` を必ず指
 **カメラの選択は全アプリで共通です。**ホーム画面の右下の小さな歯車で 1 回選べば、
 どのゲームでもそのカメラで開きます（施設や展示で使うカメラは 1 台なので、アプリごとに
 選ばせる意味がありません）。同じ origin で配信しているから成り立っています。
+
+---
+
+## 素材（BGM・画像）
+
+**アプリをまたいで雰囲気をそろえるため、素材の出どころを決めています。**
+ゲームごとに調子がばらばらだと、ホームから続けて開いたときに別のサービスに見えます。
+権利の確認先も、出どころが決まっていれば 1 か所で済みます。
+
+### BGM
+
+**次の 3 か所からダウンロードして使ってください。**
+
+| 配布元 | URL |
+|---|---|
+| 甘茶の音楽工房 | https://amachamusic.chagasi.com/index.html |
+| ノスタルジア | http://nostalgiamusic.info/index.html |
+| PeriTune | https://peritune.com/ |
+
+いずれも商用利用できるフリー素材です。甘茶の音楽工房とノスタルジアには施設で流すのに
+向いた穏やかな曲が、PeriTune には和風・お囃子などの場面に合わせた曲がそろっています
+（hanabi の `PerituneMaterial_Ohayashi.mp3` がこれです）。
+**ほかのサイトの曲は使わないでください。**新しい曲が要るときは、まずこの 3 か所で
+近いものを探します。
+
+- 置き場所は `assets/BGM/<曲名>.mp3`（例: `kinetone-flower/public/assets/BGM/pokapokayouki.mp3`）
+- **ファイル名は配布元の曲名のまま**にします。後から出どころを辿れるようにするためです
+- クレジット表記の要否は配布元の規約に従います。**ダウンロードのたびに規約を確認してください**
+
+### 画像
+
+**Adobe Firefly の、商用利用が許諾されたモデルで生成してください。**
+Adobe が学習データの権利を処理している Firefly の画像生成モデルを選びます。
+**Firefly の画面から選べる他社モデル（パートナーモデル）は使わないでください。**
+出力の扱いが Adobe の許諾の範囲から外れます。
+
+写真素材や別の生成 AI の画像を混ぜると、権利の確認先がアプリごとに散らばって
+追えなくなります。**素材は Firefly に寄せてください。**
+
+`home/thumbs/` のサムネイルはこの対象外です（実際の画面を撮ったものなので生成しません）。
 
 ---
 
