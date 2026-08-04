@@ -139,14 +139,17 @@
     },
     "block": {
       "$comment": [
-        "開発中。enabled を true にすると配信に含まれる。",
-        "別リポジトリへ切り出し済みで、Release は作ってあるがホームには並べていない。"
+        "展示会デモ用に配信する。ホームのカードにはまだ並べていない。",
+        "製品名が仮称（みんなの街）のままなので、名前が決まってから cards に足す。",
+        "この版は街が 20,650 個まで建った状態で始まる（展示会向けの種データ入り）。",
+        "施設で本当に使う版を出すときは、kinetone-block 側の CI から",
+        "VITE_DEMO_SEED を外してタグを打ち直すこと。"
       ],
-      "enabled": false,
+      "enabled": true,
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-block",
-        "tag": "v0.2.0",
+        "tag": "v0.3.0",
         "asset": "dist.zip"
       },
       "spa": true

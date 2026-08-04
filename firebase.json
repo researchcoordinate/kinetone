@@ -48,6 +48,10 @@
         "destination": "/aiube/index.html"
       },
       {
+        "source": "/block/**",
+        "destination": "/block/index.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
