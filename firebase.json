@@ -32,6 +32,10 @@
         "destination": "/chair-stand/index.html"
       },
       {
+        "source": "/balloon/**",
+        "destination": "/balloon/index.html"
+      },
+      {
         "source": "/hanabi/**",
         "destination": "/hanabi/hanabi_game.html"
       },

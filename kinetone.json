@@ -67,6 +67,20 @@
       },
       "spa": true
     },
+    "balloon": {
+      "$comment": [
+        "骨格検出を使わないゲーム。前のコマとの差だけを見る。",
+        "古いタブレット（Adreno 610 で姿勢推定が 1 回 290ms かかる端末）でも動く。",
+        "検出されない人が出ない、という点でも施設向き。"
+      ],
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/kinetone-balloon",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
+      "spa": true
+    },
     "hanabi": {
       "$comment": [
         "別リポジトリへ切り出し済み。ビルド済みの成果物（Release の zip）を取り込む。",
@@ -125,6 +139,14 @@
   },
 
   "cards": [
+    {
+      "group": "together",
+      "app": "balloon",
+      "name": "風船わり",
+      "desc": "手を動かすと、そこの風船がわれます",
+      "tag": "腕を伸ばす",
+      "thumb": "balloon.jpg"
+    },
     {
       "group": "together",
       "app": "flower",
