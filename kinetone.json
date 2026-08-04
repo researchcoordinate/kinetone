@@ -77,7 +77,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-mirror",
-        "tag": "v0.7.0",
+        "tag": "v0.8.0",
         "asset": "dist.zip"
       },
       "spa": true
@@ -185,6 +185,28 @@
       "desc": "うごくと花びらが舞い、さくらが咲きます",
       "tag": "すこし動かす",
       "thumb": "mirror.jpg"
+    },
+    {
+      "$comment": [
+        "絵柄違い。配信するものは 1 つで、url の ?theme= で中身が変わる。",
+        "app を分けると同じものを 3 回置くことになるので、url だけで名指しする。"
+      ],
+      "group": "together",
+      "app": "mirror",
+      "url": "/mirror/?theme=midori",
+      "name": "深緑の木",
+      "desc": "うごくと葉がしげり、深い緑になります",
+      "tag": "すこし動かす",
+      "thumb": "mirror-midori.jpg"
+    },
+    {
+      "group": "together",
+      "app": "mirror",
+      "url": "/mirror/?theme=koyo",
+      "name": "紅葉の木",
+      "desc": "うごくと葉が色づき、まっ赤になります",
+      "tag": "すこし動かす",
+      "thumb": "mirror-koyo.jpg"
     },
     {
       "group": "train",
