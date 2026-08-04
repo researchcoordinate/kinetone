@@ -76,7 +76,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-hanabi",
-        "tag": "v0.2.2",
+        "tag": "v0.2.3",
         "asset": "dist.zip"
       },
       "entry": "hanabi_game.html"

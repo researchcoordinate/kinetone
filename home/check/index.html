@@ -107,19 +107,19 @@
 -->
 <section>
   <h2>みんなで花火を調整する</h2>
-  <p class="note">表紙の「始める」の下に <b>版番号</b>が出ます。<b>v0.2.2 以上</b>なら新しいものです。
+  <p class="note">表紙の「始める」の下に <b>版番号</b>が出ます。<b>v0.2.3 以上</b>なら新しいものです。
      それより古ければキャッシュなので、ページを引き下げて更新してください。</p>
   <ol class="tune">
-    <li><a href="/hanabi/?debug=1">① 今の設定で測る</a>
-        <span>描画fps・推論fps・推論時間が左下に出ます</span></li>
-    <li><a href="/hanabi/?debug=1&amp;hz=3">② 推論を毎秒3回まで</a>
-        <span>GPU に空きを作る。骨格の追従が少し遅れます</span></li>
-    <li><a href="/hanabi/?debug=1&amp;hz=2">③ 毎秒2回まで</a>
-        <span>映像はさらになめらかに。手を振る反応は鈍くなります</span></li>
-    <li><a href="/hanabi/?debug=1&amp;hz=1">④ 毎秒1回まで</a>
-        <span>上限を知るための物差し。実用にはしません</span></li>
+    <li><a href="/hanabi/">① ふつうに遊ぶ</a>
+        <span>端末に合わせて自動で調整されます。まずはこれを</span></li>
+    <li><a href="/hanabi/?debug=1">② 数字を見ながら遊ぶ</a>
+        <span>描画fps・推論の間隔が左下に出ます</span></li>
+    <li><a href="/hanabi/?debug=1&amp;hz=3">③ 推論を毎秒3回に固定</a>
+        <span>反応は速いが映像は粗くなります</span></li>
+    <li><a href="/hanabi/?debug=1&amp;hz=1">④ 毎秒1回に固定</a>
+        <span>映像は最もなめらか。反応は鈍くなります</span></li>
   </ol>
-  <p class="note"><b>描画 fps</b> が映像のなめらかさです。20 を超えれば実用になります。
+  <p class="note"><b>描画 fps</b> が映像のなめらかさです。20 を超えれば実用になります。既定では、推論にかかった時間から間隔を自動で決めます。
      <a href="/hanabi/">ふつうに開く</a></p>
 </section>
 
