@@ -32,8 +32,8 @@
         "destination": "/chair-stand/index.html"
       },
       {
-        "source": "/mirror/**",
-        "destination": "/mirror/index.html"
+        "source": "/tree/**",
+        "destination": "/tree/index.html"
       },
       {
         "source": "/balloon/**",

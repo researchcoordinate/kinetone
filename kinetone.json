@@ -67,17 +67,17 @@
       },
       "spa": true
     },
-    "mirror": {
+    "tree": {
       "$comment": [
         "鏡あそび。骨格検出を使わず、前のコマとの差だけを見る。",
         "勝ち負けも時間切れも無い。ルールが壁になる方に向けたもの。",
-        "配信パスを season 名にしていないのは、絵柄（桜・紅葉・雪）を",
-        "差し替えても同じパスで配信できるようにするため。"
+        "絵柄（さくら・深緑・紅葉）はカードの ?theme= で切り替える。",
+        "配信するものは 1 つで、カードだけが 3 枚。"
       ],
       "build": {
         "kind": "github-release",
-        "repo": "researchcoordinate/kinetone-mirror",
-        "tag": "v0.8.0",
+        "repo": "researchcoordinate/kinetone-tree",
+        "tag": "v0.9.0",
         "asset": "dist.zip"
       },
       "spa": true
@@ -180,11 +180,11 @@
     },
     {
       "group": "together",
-      "app": "mirror",
+      "app": "tree",
       "name": "さくらの木",
       "desc": "うごくと花びらが舞い、さくらが咲きます",
       "tag": "すこし動かす",
-      "thumb": "mirror.jpg"
+      "thumb": "tree.jpg"
     },
     {
       "$comment": [
@@ -192,21 +192,21 @@
         "app を分けると同じものを 3 回置くことになるので、url だけで名指しする。"
       ],
       "group": "together",
-      "app": "mirror",
-      "url": "/mirror/?theme=midori",
+      "app": "tree",
+      "url": "/tree/?theme=midori",
       "name": "深緑の木",
       "desc": "うごくと葉がしげり、深い緑になります",
       "tag": "すこし動かす",
-      "thumb": "mirror-midori.jpg"
+      "thumb": "tree-midori.jpg"
     },
     {
       "group": "together",
-      "app": "mirror",
-      "url": "/mirror/?theme=koyo",
+      "app": "tree",
+      "url": "/tree/?theme=koyo",
       "name": "紅葉の木",
       "desc": "うごくと葉が色づき、まっ赤になります",
       "tag": "すこし動かす",
-      "thumb": "mirror-koyo.jpg"
+      "thumb": "tree-koyo.jpg"
     },
     {
       "group": "train",
