@@ -76,7 +76,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-balloon",
-        "tag": "v0.2.0",
+        "tag": "v0.2.1",
         "asset": "dist.zip"
       },
       "spa": true
