@@ -67,6 +67,21 @@
       },
       "spa": true
     },
+    "mirror": {
+      "$comment": [
+        "鏡あそび。骨格検出を使わず、前のコマとの差だけを見る。",
+        "勝ち負けも時間切れも無い。ルールが壁になる方に向けたもの。",
+        "配信パスを season 名にしていないのは、絵柄（桜・紅葉・雪）を",
+        "差し替えても同じパスで配信できるようにするため。"
+      ],
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/kinetone-mirror",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
+      "spa": true
+    },
     "balloon": {
       "$comment": [
         "骨格検出を使わないゲーム。前のコマとの差だけを見る。",
@@ -162,6 +177,14 @@
       "desc": "手を動かすと、そこの風船がわれます",
       "tag": "腕を伸ばす",
       "thumb": "balloon.jpg"
+    },
+    {
+      "group": "together",
+      "app": "mirror",
+      "name": "さくらの木",
+      "desc": "うごくと花びらが舞い、さくらが咲きます",
+      "tag": "すこし動かす",
+      "thumb": "mirror.jpg"
     },
     {
       "group": "train",
