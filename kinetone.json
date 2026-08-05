@@ -52,7 +52,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-stepping",
-        "tag": "v0.5.0",
+        "tag": "v0.6.0",
         "asset": "dist.zip"
       },
       "spa": true
@@ -153,6 +153,19 @@
         "asset": "dist.zip"
       },
       "spa": true
+    },
+    "atodashi-janken": {
+      "$comment": [
+        "別リポジトリへ切り出し済み。手のランドマーク検出（MediaPipe）を使う。",
+        "同時に見るのは 1 名なので、ひとりで続ける個別の運動として train に置く。"
+      ],
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/kinetone-atodashi-janken",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
+      "spa": true
     }
   },
 
@@ -243,6 +256,14 @@
       "desc": "自分の顔を見ながら「あ・い・う・べ」と口を大きく動かします",
       "tag": "お口を鍛える",
       "thumb": "aiube.jpg"
+    },
+    {
+      "group": "train",
+      "app": "atodashi-janken",
+      "name": "後出しジャンケン",
+      "desc": "画面の手に、わざと まけてください",
+      "tag": "手と頭を鍛える",
+      "thumb": "atodashi-janken.jpg"
     },
     {
       "$comment": "stepping の 2 つめの入口。measure.html を /steptest/ で開けるようにしている",
