@@ -149,7 +149,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-block",
-        "tag": "v0.3.3",
+        "tag": "v0.3.4",
         "asset": "dist.zip"
       },
       "spa": true
