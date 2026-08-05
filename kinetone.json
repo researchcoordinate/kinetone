@@ -162,7 +162,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-atodashi-janken",
-        "tag": "v0.1.1",
+        "tag": "v0.1.2",
         "asset": "dist.zip"
       },
       "spa": true
