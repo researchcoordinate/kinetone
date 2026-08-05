@@ -20,6 +20,7 @@
  * 書き換えは明示的に `--write-config` を付けたときだけ行う。
  */
 import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -312,6 +313,42 @@ async function injectHomeLink(app) {
     done += 1
   }
   if (done > 1) console.log(`  ・「ホームへもどる」を ${done} ページに入れました`)
+  await refreshServiceWorker(app, pages)
+}
+
+/**
+ * 差し込んだページを、Service Worker に取り直させる。
+ *
+ * **これが無いと、端末では永久に直らない。**
+ *
+ * Service Worker の先読み一覧は `{url, revision}` で、revision はゲーム側の
+ * ビルド時に決まる。「ホームへもどる」は取り込み時に後から差し込むので、
+ * 中身は変わっても revision は変わらない。Service Worker は「変わっていない」と
+ * 判断して、古いページを配り続ける（30秒椅子立ち上がりテストで実際に起きた）。
+ *
+ * 差し込んだあとの中身から revision を作り直して書き戻す。sw.js の中身も
+ * 変わるので、ブラウザが新しい Service Worker として入れ直す。
+ */
+async function refreshServiceWorker(app, pages) {
+  const swFile = resolve(site, app.id, 'sw.js')
+  if (!(await exists(swFile))) return
+
+  let sw = await readFile(swFile, 'utf8')
+  let updated = 0
+  for (const page of pages) {
+    const url = page.split('\\').join('/')
+    const body = await readFile(resolve(site, app.id, page))
+    const revision = createHash('md5').update(body).digest('hex')
+    // 先読み一覧の形は "<url>",revision:"<hex>"（圧縮後）
+    const pattern = new RegExp(`("${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}",revision:")[^"]*(")`)
+    if (!pattern.test(sw)) continue
+    sw = sw.replace(pattern, `$1${revision}$2`)
+    updated += 1
+  }
+  if (updated > 0) {
+    await writeFile(swFile, sw)
+    console.log(`  ・Service Worker に ${updated} ページを取り直させます`)
+  }
 }
 
 async function ensureEntry(app) {
