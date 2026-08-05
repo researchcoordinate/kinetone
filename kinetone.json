@@ -177,7 +177,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-atodashi-janken",
-        "tag": "v0.1.4",
+        "tag": "v0.1.5",
         "asset": "dist.zip"
       },
       "spa": true
