@@ -20,7 +20,15 @@
   自分で用意する必要があります（左端からのスワイプでも戻れますが、職員には
   分かりにくい）。
 -->
-<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<!--
+  sizes を明記し、古い書き方（-precomposed）も並べる。iOS は版によって
+  拾う順番が違い、どれか 1 つでも見つければアイコンになる。
+  ※ これらが 1 つも見つからないと、iOS はページの見た目を切り取って
+     アイコンにする。ホームの左上は「KINETONE」なので「K」の絵になる。
+-->
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon-precomposed" href="/icons/icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
