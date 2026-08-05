@@ -148,7 +148,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-one-leg-stand",
-        "tag": "v0.2.3",
+        "tag": "v0.2.4",
         "asset": "dist.zip"
       },
       "spa": true
