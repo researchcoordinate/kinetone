@@ -212,20 +212,20 @@
       "thumb": "tree-koyo.jpg"
     },
     {
-      "group": "together",
-      "app": "block",
-      "name": "ブロック街づくり",
-      "desc": "椅子から立って座ると、街にブロックが積まれます",
-      "tag": "立ち座りをする",
-      "thumb": "block.jpg"
-    },
-    {
       "group": "train",
       "app": "stepping",
       "name": "おさんぽ足踏み",
       "desc": "その場で足踏みすると、石畳の街が進みます",
       "tag": "足腰を鍛える",
       "thumb": "stepping.jpg"
+    },
+    {
+      "group": "train",
+      "app": "block",
+      "name": "ブロック街づくり",
+      "desc": "椅子から立って座ると、街にブロックが積まれます",
+      "tag": "立ち座りで鍛える",
+      "thumb": "block.jpg"
     },
     {
       "$comment": "あいうべは中身は同じ体操で、口の動きをキャラクターで見るか自分の顔で見るかの違い。自分の顔が映るほうは抵抗を感じる方もいるので、キャラクター版を先に置く",
