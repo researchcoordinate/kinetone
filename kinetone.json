@@ -52,7 +52,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-stepping",
-        "tag": "v0.7.6",
+        "tag": "v0.7.7",
         "asset": "dist.zip"
       },
       "spa": true
@@ -137,6 +137,31 @@
       },
       "entry": "avatar.html"
     },
+    "one-leg-stand": {
+      "$comment": [
+        "開眼片足立ちの保持時間を測る。別リポジトリで開発中。",
+        "同じ measure でも撮影の向きが違う（こちらは正面、椅子立ち上がりは側面）ので、",
+        "続けて実施するときはカメラを置き直してもらう必要がある。"
+      ],
+      "$hold": [
+        "**まだ配信しない。**researchcoordinate/kinetone-one-leg-stand がまだ無いため。",
+        "apps に残したまま enabled: false にしてあるので、cards の 1 枚も自動で外れる",
+        "（build-site は載せないアプリのカードを黙って落とす）。",
+        "",
+        "配信するときの手順：",
+        "  1. gh repo create researchcoordinate/kinetone-one-leg-stand --private",
+        "  2. 向こうで git tag v0.1.0 && git push origin v0.1.0（CI が Release を作る）",
+        "  3. この enabled: false と、この $hold を消してデプロイする"
+      ],
+      "enabled": false,
+      "build": {
+        "kind": "github-release",
+        "repo": "researchcoordinate/kinetone-one-leg-stand",
+        "tag": "v0.1.0",
+        "asset": "dist.zip"
+      },
+      "spa": true
+    },
     "block": {
       "$comment": [
         "展示会デモ用に配信する。ホームのカードにはまだ並べていない。",
@@ -162,7 +187,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-atodashi-janken",
-        "tag": "v0.1.3",
+        "tag": "v0.1.4",
         "asset": "dist.zip"
       },
       "spa": true

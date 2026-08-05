@@ -271,8 +271,9 @@ site/
   <id>/               各ゲーム（Release の zip を展開したもの）
 ```
 
-**取り込んだ HTML には 1 つだけ手を入れます。**入口の HTML に「ホームへもどる」を
-差し込みます（`injectHomeLink`）。iPad のホーム画面に置くと Safari の枠ごと
+**取り込んだ HTML には 1 つだけ手を入れます。**そのゲームの**すべてのページ**に
+「ホームへもどる」を差し込みます（`injectHomeLink`）。入口が複数あるゲームが
+あるためです（`stepping/measure.html`、`chair-stand/cs30/index.html` など）。iPad のホーム画面に置くと Safari の枠ごと
 「戻る」が消えるため、ゲームからホームへ帰る道が要るからです。
 
 各ゲームのリポジトリには入れていません。7 本を別々に直すと、リリースとデプロイが
@@ -379,9 +380,11 @@ Adobe が学習データの権利を処理している Firefly の画像生成�
 | [`stepping`](https://github.com/researchcoordinate/kinetone-stepping) | `/stepping/` | おさんぽ足踏み（その場足踏みで石畳の街が進む） |
 | 同上 | `/steptest/` | 2分間足踏みテスト（同じ成果物の `measure.html`） |
 | [`chair-stand`](https://github.com/researchcoordinate/kinetone-chair-stand) | `/chair-stand/` | 5回椅子立ち上がりテスト（FTSST） |
+| 同上 | `/chair-stand/cs30/` | 30秒椅子立ち上がりテスト（CS-30。同じ成果物の別ページ） |
 | [`aiube`](https://github.com/researchcoordinate/kinetone-aiube) | `/aiube/` | あいうべ体操・自分の顔版 |
 | 同上 | `/aiube-avatar/` | あいうべ体操・キャラクター版（同じ zip・入口だけ違う） |
 | [`block`](https://github.com/researchcoordinate/kinetone-block) | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） |
+| `one-leg-stand` | （未配信） | 開眼片足立ちテスト（**リポジトリ未作成**。手元で開発中） |
 
 新しく作るときの出発点は [`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) です。
 

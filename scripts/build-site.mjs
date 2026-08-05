@@ -20,7 +20,7 @@
  * 書き換えは明示的に `--write-config` を付けたときだけ行う。
  */
 import { execFileSync } from 'node:child_process'
-import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -278,23 +278,40 @@ const HOME_LINK = `
 `
 
 /**
- * 「ホームへもどる」を入口の HTML に差し込む。
+ * 「ホームへもどる」を、そのゲームの**すべての HTML** に差し込む。
+ *
+ * 入口の 1 ファイルだけでは足りない。ゲームによっては入口が複数ある。
+ *
+ *   stepping/index.html         おさんぽ足踏み
+ *   stepping/measure.html       2分間足踏みテスト
+ *   chair-stand/index.html      5回椅子立ち上がりテスト
+ *   chair-stand/cs30/index.html 30秒椅子立ち上がりテスト
+ *
+ * どれもホームのカードから直接開くので、全部に要る。入口だけ入れていた時期が
+ * あり、測定 3 種のうち 2 つに戻る道が無かった。
  *
  * ensureEntry より**前**に呼ぶこと。入口が index.html 以外のゲーム（花火）でも、
  * 差し込んだものがそのまま index.html にコピーされる。
  */
 async function injectHomeLink(app) {
+  const dir = resolve(site, app.id)
   const entry = app.entry ?? 'index.html'
-  const file = resolve(site, app.id, entry)
-  if (!(await exists(file))) {
+  if (!(await exists(resolve(dir, entry)))) {
     throw new Error(`${app.id}: 入口の ${entry} が見つかりません`)
   }
-  const html = await readFile(file, 'utf8')
-  if (html.includes('kinetone-home')) return // 二重に入れない
-  if (!html.includes('</body>')) {
-    throw new Error(`${app.id}: ${entry} に </body> がないので「ホームへもどる」を入れられません`)
+
+  const names = await readdir(dir, { recursive: true })
+  const pages = names.filter((name) => name.endsWith('.html'))
+  let done = 0
+  for (const name of pages) {
+    const file = resolve(dir, name)
+    const html = await readFile(file, 'utf8')
+    if (html.includes('kinetone-home')) continue // 二重に入れない
+    if (!html.includes('</body>')) continue // 断片など、ページでないものは触らない
+    await writeFile(file, html.replace('</body>', `${HOME_LINK}</body>`))
+    done += 1
   }
-  await writeFile(file, html.replace('</body>', `${HOME_LINK}</body>`))
+  if (done > 1) console.log(`  ・「ホームへもどる」を ${done} ページに入れました`)
 }
 
 async function ensureEntry(app) {
