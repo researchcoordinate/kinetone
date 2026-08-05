@@ -241,6 +241,62 @@ async function buildApp(app) {
  * rewrites では入口を差し替えられない。1 つの成果物を複数の入口で使うとき
  * （あいうべ体操のメッシュ版とアバター版は同じ zip）に、別の版が出てしまう。
  */
+/*
+  「ホームへもどる」。
+
+  iPad のホーム画面に置くと Safari の枠ごと「戻る」が消えるので、ゲームから
+  ホームへ帰る道が要る（左端からのスワイプでも戻れるが、職員には分かりにくい）。
+
+  **各ゲームのリポジトリには入れない。**7 本を別々に直すと、リリースとデプロイが
+  7 回必要になり、書き方が少しずつずれ、次に作るゲームでまた忘れられる。
+  ここで差し込めば 1 か所で済み、新しいゲームにも自動で付く。
+
+  置き場所は左上。カメラの歯車が右下なので、ぶつからない。利用者の手は画面の
+  中央から下に来るので、うっかり押されにくい。
+*/
+const HOME_LINK = `
+<a class="kinetone-home" href="/" aria-label="キネトーンのホームへもどる">
+  <span aria-hidden="true">←</span> ホーム
+</a>
+<style>
+.kinetone-home{
+  position:fixed; top:10px; left:10px; z-index:2147483000;
+  display:inline-flex; align-items:center; gap:.35em;
+  /* 押しやすさは要るが、目立たせない。利用者ではなく職員のためのもの */
+  min-height:44px; padding:0 16px; border-radius:999px;
+  font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:15px; font-weight:700; line-height:1; text-decoration:none;
+  /* 明るい画面にも暗い画面にも載るよう、暗い地に白文字＋薄い縁 */
+  color:#fff; background:rgba(12,20,32,.55); border:1px solid rgba(255,255,255,.34);
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  -webkit-user-select:none; user-select:none; touch-action:manipulation;
+  opacity:.72;
+}
+.kinetone-home:hover, .kinetone-home:focus-visible{ opacity:1; }
+.kinetone-home:active{ transform:translateY(1px); }
+</style>
+`
+
+/**
+ * 「ホームへもどる」を入口の HTML に差し込む。
+ *
+ * ensureEntry より**前**に呼ぶこと。入口が index.html 以外のゲーム（花火）でも、
+ * 差し込んだものがそのまま index.html にコピーされる。
+ */
+async function injectHomeLink(app) {
+  const entry = app.entry ?? 'index.html'
+  const file = resolve(site, app.id, entry)
+  if (!(await exists(file))) {
+    throw new Error(`${app.id}: 入口の ${entry} が見つかりません`)
+  }
+  const html = await readFile(file, 'utf8')
+  if (html.includes('kinetone-home')) return // 二重に入れない
+  if (!html.includes('</body>')) {
+    throw new Error(`${app.id}: ${entry} に </body> がないので「ホームへもどる」を入れられません`)
+  }
+  await writeFile(file, html.replace('</body>', `${HOME_LINK}</body>`))
+}
+
 async function ensureEntry(app) {
   const entry = app.entry ?? 'index.html'
   if (entry === 'index.html') return
@@ -290,6 +346,7 @@ await mkdir(site, { recursive: true })
 
 for (const app of apps) {
   await buildApp(app)
+  await injectHomeLink(app)
   await ensureEntry(app)
 }
 
