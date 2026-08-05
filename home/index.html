@@ -5,6 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KINETONE：キネトーン　高齢者向け体感ゲーム</title>
 <meta name="description" content="KINETONE（キネトーン）— カメラ 1 台で遊べる高齢者向け体感ゲーム">
+
+<!--
+  iPad のホーム画面に置けるようにする（「共有」→「ホーム画面に追加」）。
+
+  **apple-touch-icon を置かないと、iOS はページのスクリーンショットを
+  アイコンにします。**何のアプリか分からない絵になるので必ず置くこと。
+
+  apple-mobile-web-app-capable="yes" で、Safari の枠（URL 欄・タブ）が消えて
+  全画面で開きます。施設のタブレットでは、URL 欄を触られて別の場所へ行って
+  しまう事故が減るので、こちらにしています。
+
+  ただし**枠と一緒に「戻る」も消えます。**ゲームからホームへ戻る道は各ゲームが
+  自分で用意する必要があります（左端からのスワイプでも戻れますが、職員には
+  分かりにくい）。
+-->
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- ホーム画面のアイコンの下に出る名前。長いと省略されるので短く -->
+<meta name="apple-mobile-web-app-title" content="キネトーン">
+<!-- 地が明るいので、時刻やバッテリーは黒字（default）にする -->
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0e8f79">
+
 <style>
   :root{
     /* 明るい地に濃い文字。真っ白(#fff)はタブレットで反射がきついので少し灰みを入れる */

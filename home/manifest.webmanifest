@@ -1,0 +1,22 @@
+{
+  "name": "KINETONE キネトーン",
+  "short_name": "キネトーン",
+  "description": "カメラ 1 台で遊べる高齢者向け体感ゲーム",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#f7f8fb",
+  "theme_color": "#0e8f79",
+  "lang": "ja",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
