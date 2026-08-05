@@ -212,6 +212,14 @@
       "thumb": "tree-koyo.jpg"
     },
     {
+      "group": "together",
+      "app": "block",
+      "name": "みんなの街",
+      "desc": "椅子から立って座ると、みんなの街にブロックが積まれます",
+      "tag": "立ち座りをする",
+      "thumb": "block.jpg"
+    },
+    {
       "group": "train",
       "app": "stepping",
       "name": "おさんぽ足踏み",
