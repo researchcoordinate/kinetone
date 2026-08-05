@@ -119,7 +119,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-aiube",
-        "tag": "v0.6.0",
+        "tag": "v0.6.1",
         "asset": "dist.zip"
       }
     },
@@ -132,7 +132,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-aiube",
-        "tag": "v0.6.0",
+        "tag": "v0.6.1",
         "asset": "dist.zip"
       },
       "entry": "avatar.html"
