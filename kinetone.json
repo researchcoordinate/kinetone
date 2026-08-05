@@ -162,7 +162,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-atodashi-janken",
-        "tag": "v0.1.0",
+        "tag": "v0.1.1",
         "asset": "dist.zip"
       },
       "spa": true
@@ -261,7 +261,7 @@
       "group": "train",
       "app": "atodashi-janken",
       "name": "後出しジャンケン",
-      "desc": "画面の手に、わざと まけてください",
+      "desc": "画面の手に、わざと 負けてください",
       "tag": "手と頭を鍛える",
       "thumb": "atodashi-janken.jpg"
     },
