@@ -139,21 +139,11 @@
     },
     "one-leg-stand": {
       "$comment": [
-        "開眼片足立ちの保持時間を測る。別リポジトリで開発中。",
+        "別リポジトリへ切り出し済み。開眼片足立ちの保持時間を測る。",
         "同じ measure でも撮影の向きが違う（こちらは正面、椅子立ち上がりは側面）ので、",
-        "続けて実施するときはカメラを置き直してもらう必要がある。"
+        "続けて実施するときはカメラを置き直してもらう必要がある。",
+        "年代別の区分値はまだ入っていないので、結果は秒数と 15 秒の目安だけを出す。"
       ],
-      "$hold": [
-        "**まだ配信しない。**researchcoordinate/kinetone-one-leg-stand がまだ無いため。",
-        "apps に残したまま enabled: false にしてあるので、cards の 1 枚も自動で外れる",
-        "（build-site は載せないアプリのカードを黙って落とす）。",
-        "",
-        "配信するときの手順：",
-        "  1. gh repo create researchcoordinate/kinetone-one-leg-stand --private",
-        "  2. 向こうで git tag v0.1.0 && git push origin v0.1.0（CI が Release を作る）",
-        "  3. この enabled: false と、この $hold を消してデプロイする"
-      ],
-      "enabled": false,
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-one-leg-stand",

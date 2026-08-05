@@ -48,6 +48,10 @@
         "destination": "/aiube/index.html"
       },
       {
+        "source": "/one-leg-stand/**",
+        "destination": "/one-leg-stand/index.html"
+      },
+      {
         "source": "/block/**",
         "destination": "/block/index.html"
       },

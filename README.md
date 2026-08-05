@@ -384,7 +384,7 @@ Adobe が学習データの権利を処理している Firefly の画像生成�
 | [`aiube`](https://github.com/researchcoordinate/kinetone-aiube) | `/aiube/` | あいうべ体操・自分の顔版 |
 | 同上 | `/aiube-avatar/` | あいうべ体操・キャラクター版（同じ zip・入口だけ違う） |
 | [`block`](https://github.com/researchcoordinate/kinetone-block) | （未配信） | 運動を積み上げて街をつくるゲーム（開発中） |
-| `one-leg-stand` | （未配信） | 開眼片足立ちテスト（**リポジトリ未作成**。手元で開発中） |
+| [`one-leg-stand`](https://github.com/researchcoordinate/kinetone-one-leg-stand) | `/one-leg-stand/` | 開眼片足立ちテスト（片足で立っていられる時間。**正面から撮影**） |
 
 新しく作るときの出発点は [`kinetone-template`](https://github.com/researchcoordinate/kinetone-template) です。
 
