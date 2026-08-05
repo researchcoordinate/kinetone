@@ -38,7 +38,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-flower",
-        "tag": "v0.1.0",
+        "tag": "v0.2.0",
         "asset": "dist.zip"
       },
       "spa": true
@@ -62,7 +62,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-chair-stand",
-        "tag": "v0.4.0",
+        "tag": "v0.5.0",
         "asset": "dist.zip"
       },
       "spa": true
@@ -91,7 +91,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-balloon",
-        "tag": "v0.3.0",
+        "tag": "v0.4.0",
         "asset": "dist.zip"
       },
       "spa": true
@@ -165,7 +165,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-block",
-        "tag": "v0.3.7",
+        "tag": "v0.3.8",
         "asset": "dist.zip"
       },
       "spa": true
