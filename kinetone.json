@@ -162,7 +162,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-atodashi-janken",
-        "tag": "v0.1.2",
+        "tag": "v0.1.3",
         "asset": "dist.zip"
       },
       "spa": true
@@ -293,6 +293,15 @@
       "desc": "30秒間に立ち座りできた回数を数え、年代・性別の基準と比べます",
       "tag": "立ち座りの力と持久力をはかる",
       "thumb": "cs30.jpg"
+    },
+    {
+      "$comment": "撮影は正面から。上の 2 種（側面）と続けて行うときはカメラを置き直す",
+      "group": "measure",
+      "app": "one-leg-stand",
+      "name": "開眼片足立ちテスト",
+      "desc": "片足で立っていられる時間を計り、年代・性別の基準と比べます",
+      "tag": "バランスをはかる",
+      "thumb": "one-leg-stand.jpg"
     }
   ]
 }
