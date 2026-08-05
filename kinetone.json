@@ -149,7 +149,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-block",
-        "tag": "v0.3.1",
+        "tag": "v0.3.2",
         "asset": "dist.zip"
       },
       "spa": true
@@ -214,8 +214,8 @@
     {
       "group": "together",
       "app": "block",
-      "name": "みんなの街",
-      "desc": "椅子から立って座ると、みんなの街にブロックが積まれます",
+      "name": "ブロック街づくり",
+      "desc": "椅子から立って座ると、街にブロックが積まれます",
       "tag": "立ち座りをする",
       "thumb": "block.jpg"
     },
