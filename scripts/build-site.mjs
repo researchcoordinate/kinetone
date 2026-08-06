@@ -77,6 +77,7 @@ function renderCard(card, group) {
           <span class="tags">${tags}</span>
           <span class="name">${escape(card.name)}</span>
           <span class="desc">${escape(card.desc)}</span>
+          ${card.note ? `<span class="note">${escape(card.note)}</span>` : ''}
         </span>
       </a></li>`
 }

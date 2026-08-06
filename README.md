@@ -170,6 +170,7 @@ sips -s format jpeg -s formatOptions 80 -z 270 480 /tmp/shot.png --out home/thum
     "name": "ゲームの名前",
     "desc": "ホームに出す一行説明",
     "tag": "全身を動かす",             // 何を動かすか・何をはかるか
+    "note": "※〜",                    // 任意。説明の下に、色を変えて小さく出る
     "thumb": "<name>.jpg" }
 ]
 ```
