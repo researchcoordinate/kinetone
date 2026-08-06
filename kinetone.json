@@ -148,7 +148,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-one-leg-stand",
-        "tag": "v0.4.1",
+        "tag": "v0.4.2",
         "asset": "dist.zip"
       },
       "spa": true
@@ -289,6 +289,7 @@
       "rewriteTo": "/stepping/measure.html",
       "name": "2分間足踏みテスト",
       "desc": "その場足踏みの回数を数え、年代・性別の基準と比べます",
+      "note": "※デモ用に1分にしています",
       "tag": "足腰の持久力をはかる",
       "thumb": "steptest.jpg"
     },
