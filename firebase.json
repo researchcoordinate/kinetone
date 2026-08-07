@@ -10,6 +10,9 @@
     "predeploy": [
       "node scripts/build-site.mjs"
     ],
+    "postdeploy": [
+      "node scripts/verify-deploy.mjs"
+    ],
     "rewrites": [
       {
         "source": "/steptest",
