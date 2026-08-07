@@ -38,7 +38,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-flower",
-        "tag": "v0.2.0",
+        "tag": "v0.2.1",
         "asset": "dist.zip"
       },
       "spa": true
@@ -77,7 +77,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-tree",
-        "tag": "v0.10.2",
+        "tag": "v0.10.3",
         "asset": "dist.zip"
       },
       "spa": true
@@ -91,7 +91,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-balloon",
-        "tag": "v0.4.0",
+        "tag": "v0.4.1",
         "asset": "dist.zip"
       },
       "spa": true
@@ -165,7 +165,7 @@
       "build": {
         "kind": "github-release",
         "repo": "researchcoordinate/kinetone-block",
-        "tag": "v0.3.8",
+        "tag": "v0.3.9",
         "asset": "dist.zip"
       },
       "spa": true
