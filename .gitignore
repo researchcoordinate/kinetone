@@ -8,6 +8,9 @@ node_modules
 # Firebase デプロイキャッシュ
 .firebase/
 
+# Firebase CLI が deploy のたびに書き出すログ（末尾に番号が付くこともある）
+firebase-debug.log*
+
 # 別リポジトリから取得した成果物のキャッシュ
 /.cache/
 
