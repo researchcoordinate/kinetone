@@ -89,6 +89,32 @@ node scripts/build-site.mjs && node scripts/verify-deploy.mjs
 本文は落とさず、**Firebase Hosting の ETag（中身を gzip した sha256）**と手元の
 計算を突き合わせています。`site/` は 376MB あるので、取得して比べる方法は採れません。
 
+### デプロイは 1 つずつ（`scripts/deploy-lock.mjs`）
+
+**2 人が同時にデプロイすると、本番が空になります。**`build-site.mjs` は `site/` を
+消してから作り直すので、次のことが起きます。
+
+```
+A: predeploy（site/ を作る）→ 送信中 ………………………
+B:                    predeploy（site/ を消す）→ 作り直し
+A: 送信が終わる → 空の site/ が本番として公開される
+```
+
+2026-08-07 に実際に起きました（kinetone.web.app が全ページ 404）。気づけたのは
+上の照合が全件 404 を報せたためです。
+
+そこで、`site/` を消す前に鍵（`.deploy.lock`）を取ります。**鍵はビルドの間だけでなく、
+送信が終わるまで持ち続けます**（predeploy で取り、postdeploy で返す）。ビルドの間だけ
+にすると、送信中に相手のビルドが始まってしまうためです。
+
+- ほかのデプロイが動いていれば、空くまで待ちます（最大 5 分。それを過ぎたら止まります）
+- 途中で落ちて鍵が残っても、**そのプロセスが消えていれば取り直します**。
+  別の端末のものは 15 分で取り直します
+- どうしても消したいときは `rm .deploy.lock`
+
+`node scripts/build-site.mjs` を単独で走らせたときは、終わりに鍵を返します
+（デプロイの中かどうかは、Firebase CLI が hook に渡す `RESOURCE_DIR` で分かります）。
+
 ---
 
 ## ゲームを新しく追加する

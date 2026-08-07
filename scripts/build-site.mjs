@@ -24,6 +24,7 @@ import { createHash } from 'node:crypto'
 import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { acquire } from './deploy-lock.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const site = resolve(root, 'site')
@@ -394,6 +395,13 @@ async function fetchRelease({ repo, tag, asset }) {
 
 // ---------------------------------------------------------------------------
 
+/*
+ * **site/ を消す前に鍵を取る。**ここから下は site/ が一時的に空になるので、
+ * ほかのデプロイが送信中だと、その人が空のまま本番へ出してしまう（実際に起きた）。
+ * デプロイの中で動いているときは、鍵は postdeploy（verify-deploy.mjs）が返す。
+ */
+const { keepForDeploy } = await acquire('build-site')
+
 await syncFirebaseConfig()
 
 await rm(site, { recursive: true, force: true })
@@ -420,3 +428,10 @@ console.log(
   `\n✓ site/ を作成しました（アプリ ${apps.length} 個 / カード ${cards.length} 枚）` +
     '\n  npx firebase-tools deploy --only hosting で配信',
 )
+
+/*
+ * 鍵は終わるときに自動で返る（deploy-lock.mjs が仕掛けてある）。
+ * ただしデプロイの中でうまくいったときだけは、送信が終わるまで持ち続ける。
+ * ここで返すと、送信中にほかのビルドが始まって site/ を消せてしまう。
+ */
+if (keepForDeploy) console.log('  ・鍵は送信が終わるまで持ちます（postdeploy が返します）')

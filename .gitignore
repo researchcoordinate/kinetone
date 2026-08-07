@@ -10,3 +10,6 @@ node_modules
 
 # 別リポジトリから取得した成果物のキャッシュ
 /.cache/
+
+# デプロイの重なりを防ぐ鍵（scripts/deploy-lock.mjs）
+/.deploy.lock

@@ -39,6 +39,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gzipSync } from 'node:zlib'
+import { releaseAny } from './deploy-lock.mjs'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 
@@ -166,4 +167,13 @@ async function main() {
   process.exitCode = 1
 }
 
-await main()
+/*
+ * **鍵は必ず返す。**照合が食い違っても返す（返さないと、直すためのデプロイも
+ * TTL が切れるまで待たされる）。取ったのは predeploy の別プロセスなので、
+ * 持ち主を問わず返す releaseAny を使う。
+ */
+try {
+  await main()
+} finally {
+  await releaseAny()
+}
